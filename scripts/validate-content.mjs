@@ -18,7 +18,7 @@ const debugCount=(debugging.match(/id:'/g)||[]).length;
 const interviewCount=(interview.match(/q\('i/g)||[]).length;
 const bossCount=(bosses.match(/b\('/g)||[]).length;
 const phaseCount=(bosses.match(/starterCode:/g)||[]).length;
-const projectCount=(projects.match(/tier:'(?:beginner|intermediate|advanced)'/g)||[]).length;
+const projectCount=(projects.match(/\bid:'[^']+',tier:'/g)||[]).length;
 const projectValidationCount=(projects.match(/validation:\{requiredPatterns:/g)||[]).length;
 if(lessonCount<50)throw new Error(`Expected a deep curriculum, found only ${lessonCount} lesson entries`);
 if(debugCount<8)throw new Error(`Expected at least 8 debugging cases, found ${debugCount}`);
