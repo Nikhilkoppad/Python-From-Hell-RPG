@@ -14,9 +14,11 @@ export async function evaluateLessonChallenge(lesson:Lesson,source:string,visibl
  for(const pattern of spec.required??[])if(!pattern.test(source))return{passed:false,reason:`Your output is close, but the solution is missing required concept: ${pattern.source}`};
  for(const pattern of spec.forbidden??[])if(pattern.test(source))return{passed:false,reason:`This solution uses a shortcut the challenge forbids: ${pattern.source}`};
  if(spec.harness){
-  const hidden=await runner.run(`${source}\n\n# PYTHON FROM HELL PRIVATE CHECK\n${spec.harness}`);
+  const encoded=JSON.stringify(source);
+  const hiddenProgram=`import io, contextlib\n_src=${encoded}\n_buffer=io.StringIO()\nwith contextlib.redirect_stdout(_buffer):\n    exec(compile(_src, '<challenge>', 'exec'), {})\n${spec.harness}`;
+  const hidden=await runner.run(hiddenProgram);
   if(hidden.error)return{passed:false,reason:`Private test failed: ${hidden.error}`,hiddenChecked:true};
-  if(spec.expected!==undefined&&hidden.stdout.trim()!==spec.expected.trim())return{passed:false,reason:'The visible output looks right, but the private test did not pass. Check the behavior rather than the example.',hiddenChecked:true};
+  if(spec.expected!==undefined&&hidden.stdout.trim()!==spec.expected.trim())return{passed:false,reason:'The visible example looks right, but the private behavior test failed. Check the implementation, not just the sample output.',hiddenChecked:true};
   return{passed:true,reason:'Challenge cleared. Private behavior test passed.',hiddenChecked:true};
  }
  if(spec.expected!==undefined&&visible.stdout.trim()!==spec.expected.trim())return{passed:false,reason:`Expected ${JSON.stringify(spec.expected.trim())} but received ${JSON.stringify(visible.stdout.trim())}.`};
