@@ -2,7 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import './styles.css';
 import './ui-polish.css';
-import AppV3 from './AppV3';
+import AppFinal from './AppFinal';
 import {ErrorBoundary} from './components/ErrorBoundary';
 
-createRoot(document.getElementById('root')!).render(<StrictMode><ErrorBoundary><AppV3/></ErrorBoundary></StrictMode>);
+createRoot(document.getElementById('root')!).render(<StrictMode><ErrorBoundary><AppFinal/></ErrorBoundary></StrictMode>);
