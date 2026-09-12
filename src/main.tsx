@@ -4,6 +4,7 @@ import './styles.css';
 import './ui-polish.css';
 import './mobile-polish.css';
 import './save-polish.css';
+import './interview-polish.css';
 import AppFinal from './AppFinal';
 import {ErrorBoundary} from './components/ErrorBoundary';
 import {CosmeticHud} from './components/CosmeticHud';
