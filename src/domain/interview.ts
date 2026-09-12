@@ -1,16 +1,34 @@
-export type InterviewQuestion = {
-  id: string;
-  tier: 'fundamentals' | 'intermediate' | 'advanced' | 'runtime';
-  prompt: string;
-  expectedPoints: string[];
-  followUp: string;
-};
-
-export const interviewQuestions: InterviewQuestion[] = [
-  { id: 'i01', tier: 'fundamentals', prompt: 'What is the difference between == and is?', expectedPoints: ['== compares equality', 'is tests object identity'], followUp: 'Why can two equal objects be distinct objects?' },
-  { id: 'i02', tier: 'intermediate', prompt: 'Why are mutable default arguments dangerous?', expectedPoints: ['default evaluated once at function definition', 'mutable state can persist across calls'], followUp: 'Show the None-sentinel pattern.' },
-  { id: 'i03', tier: 'intermediate', prompt: 'What problem does a generator solve?', expectedPoints: ['lazy iteration', 'yields values over time', 'avoids materializing the full sequence'], followUp: 'What changes when next() is called?' },
-  { id: 'i04', tier: 'advanced', prompt: 'How do decorators transform a function?', expectedPoints: ['callable receives another callable', 'returns a replacement/wrapper callable', 'binding occurs at definition time'], followUp: 'Why is functools.wraps useful?' },
-  { id: 'i05', tier: 'advanced', prompt: 'What is the difference between method lookup and inheritance?', expectedPoints: ['inheritance supplies attributes through the hierarchy', 'method lookup follows MRO rules'], followUp: 'Why does Python use a method resolution order?' },
-  { id: 'i06', tier: 'runtime', prompt: 'Why must advanced CPython claims be version-labelled?', expectedPoints: ['CPython is one implementation of Python', 'implementation details can change between releases', 'language specification and implementation behavior differ'], followUp: 'What source would you inspect before making a CPython internals claim?' },
+export type InterviewQuestion={id:string;tier:'fundamentals'|'intermediate'|'advanced'|'runtime';prompt:string;expectedPoints:string[];followUp:string;roast:string};
+const q=(id:string,tier:InterviewQuestion['tier'],prompt:string,expectedPoints:string[],followUp:string,roast:string):InterviewQuestion=>({id,tier,prompt,expectedPoints,followUp,roast});
+export const interviewQuestions:InterviewQuestion[]=[
+q('i01','fundamentals','What is the difference between == and is?',['== compares value equality','is tests object identity'],'Give an example where two values are equal but not identical.','Two equal objects are not automatically twins.'),
+q('i02','fundamentals','What does assignment do in Python?',['binds a name to an object','does not mean a variable is a box'],'Explain what happens when two names reference one list.','Stop imagining tiny labeled boxes.'),
+q('i03','fundamentals','What does input() return?',['a string','reads a line of input'],'How would you safely convert numeric input?','The keyboard gives you text, not a gift-wrapped int.'),
+q('i04','fundamentals','What is the difference between a list and a tuple?',['list is mutable','tuple is immutable sequence'],'When would you choose each?','One has a mutation button. The other pretends it does not.'),
+q('i05','fundamentals','What makes a dictionary key valid?',['hashable','equality and hashing relationship'],'Why can a list not normally be a dict key?','Your key needs to behave predictably when hashed.'),
+q('i06','fundamentals','What does a for loop iterate over?',['iterable','values are produced by iteration'],'What protocol sits underneath iteration?','Loop syntax is just a polite front desk.'),
+q('i07','fundamentals','What is truthiness in Python?',['objects have truth-value testing','bool can be used for truth testing'],'Name a few commonly false values.','Not everything needs to be literally True or False.'),
+q('i08','fundamentals','Why is indentation important in Python?',['defines suites or blocks','syntax structure'],'How does it differ from visual formatting?','The spaces are doing actual work. Respect them.'),
+q('i09','intermediate','Why are mutable default arguments dangerous?',['default evaluated once at definition time','mutable state persists across calls'],'Show the None-sentinel pattern.','A function remembering old state is not always a feature.'),
+q('i10','intermediate','What is the difference between parameters and arguments?',['parameters in definition','arguments at call site'],'How do *args and **kwargs change this?','The contract and the payment are not the same thing.'),
+q('i11','intermediate','Explain LEGB name resolution.',['local','enclosing','global','built-in'],'Where does a nested function look before globals?','Python searches scopes; it does not read your mind.'),
+q('i12','intermediate','What does nonlocal do?',['rebinds enclosing-scope name','used in nested function'],'Why is nonlocal different from global?','Same rebellion, different jurisdiction.'),
+q('i13','intermediate','What is a closure?',['function retains access to enclosing bindings','nested function'],'Give a useful use case.','The function remembers. Congratulations, you created state.'),
+q('i14','intermediate','What is the difference between an exception and a syntax error?',['syntax error prevents parsing/compilation of source','exception occurs during execution'],'How should debugging differ?','One fails before the program gets moving; the other waits for runtime.'),
+q('i15','intermediate','Why catch specific exception types?',['avoid hiding unrelated bugs','handle known failure cases'],'When might except Exception be justified?','Catching everything is how bugs become folklore.'),
+q('i16','intermediate','What does finally guarantee?',['cleanup suite executes as control leaves try'],'Name a resource cleanup example.','The cleanup crew shows up even after the explosion.'),
+q('i17','intermediate','What does yield change about a function?',['returns a generator object','suspends and resumes execution'],'What does next() do?','You traded one giant result for a sequence of checkpoints.'),
+q('i18','intermediate','Why use generators?',['lazy evaluation','avoid materializing full sequence','stream values'],'Give a case where this matters for memory.','Do not build a mountain to inspect one pebble.'),
+q('i19','advanced','How does a decorator transform a function?',['receives callable','returns callable','binding occurs at definition time'],'Why use functools.wraps?','A function wearing another function as a jacket.'),
+q('i20','advanced','What is a descriptor?',['implements __get__ or __set__ or __delete__','participates in attribute access'],'Why are descriptors important to Python objects?','Attribute lookup has a hidden security guard.'),
+q('i21','advanced','What is the MRO?',['method resolution order','determines attribute lookup in inheritance hierarchy'],'Why is C3 linearization relevant?','Multiple inheritance means somebody needs a queue.'),
+q('i22','advanced','What is the difference between threading and multiprocessing?',['threads share process memory','processes have separate memory spaces'],'When is multiprocessing useful for CPU work?','New process, new problems, new PID.'),
+q('i23','advanced','What is a race condition?',['correctness depends on timing/interleaving','shared state can conflict'],'How would you make the critical section safer?','It passed your test. The race did not receive the memo.'),
+q('i24','advanced','What does a lock protect?',['critical section','mutual exclusion'],'Why can locks still cause deadlocks or poor performance?','A lock is a tool, not a personality.'),
+q('i25','advanced','What does async/await provide?',['coroutines','cooperative suspension','event loop scheduling'],'How is this different from automatic parallel CPU execution?','Await is not a magic second CPU.'),
+q('i26','runtime','Why must bytecode claims be version-labelled?',['bytecode is CPython implementation detail','opcodes can change between versions'],'Which module would you inspect first?','Opcode prophecy ages badly.'),
+q('i27','runtime','What is PyObject in CPython?',['C-level object representation concept','implementation-specific'],'Why should this not be taught as the Python language specification?','The interpreter has a basement; the language spec does not promise its furniture.'),
+q('i28','runtime','What is CPython reference counting?',['CPython uses reference counting','implementation detail','part of memory management'],'Why is cyclic GC also needed?','Counting references is not enough when they form a circle.'),
+q('i29','runtime','What changed with CPython free-threading in 3.13?',['experimental free-threaded build','GIL can be disabled','not every build is free-threaded'],'Why can extensions matter for free-threading?','The GIL did not vanish from every installation overnight.'),
+q('i30','runtime','What is the experimental CPython JIT story in 3.13?',['experimental JIT','build-dependent','not enabled by default in ordinary builds'],'How would you verify whether a runtime has it?','Do not put JIT on your résumé until you know what actually ran.'),
 ];
