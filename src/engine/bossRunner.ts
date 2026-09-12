@@ -6,6 +6,9 @@ import {evaluateLessonChallenge} from './challengeRunner';
 export type BossPhaseResult={passed:boolean;reason:string;hiddenChecked?:boolean};
 
 export async function evaluateBossPhase(phase:BossPhase,source:string,visible:RunResult,runner:PythonRunner):Promise<BossPhaseResult>{
+ const challenge=phase.challenge
+  ? {...phase.challenge,expected:phase.expectedOutput.trim()===''?phase.challenge.expected:phase.expectedOutput}
+  : {expected:phase.expectedOutput};
  const lesson:Lesson={
   id:`boss:${phase.name.toLowerCase().replace(/\s+/g,'-')}`,
   layer:1,
@@ -19,7 +22,7 @@ export async function evaluateBossPhase(phase:BossPhase,source:string,visible:Ru
   starterCode:phase.starterCode,
   expectedOutput:phase.expectedOutput,
   hints:[],
-  challenge:phase.challenge,
+  challenge,
  };
  const result=await evaluateLessonChallenge(lesson,source,visible,runner);
  return{passed:result.passed,reason:result.reason,hiddenChecked:result.hiddenChecked};
