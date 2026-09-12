@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
-import type {Dispatch,SetStateAction} from 'react';
+import type {Dispatch as ReactDispatch,SetStateAction as ReactSetStateAction} from 'react';
 declare global {
- type AppDispatch<A>=Dispatch<A>;
- type AppSetStateAction<S>=SetStateAction<S>;
+ type Dispatch<A>=ReactDispatch<A>;
+ type SetStateAction<S>=ReactSetStateAction<S>;
 }
 export {};
