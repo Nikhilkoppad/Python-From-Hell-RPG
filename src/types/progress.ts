@@ -1,1 +1,30 @@
-export type Progress={version:1;currentLayer:number;currentLessonId:string;completedLessons:string[];xp:number;streak:number;mastery:Record<string,number>;achievements:string[];settings:{roastIntensity:'MILD'|'SAVAGE'|'APOCALYPSE';sound:boolean;reducedMotion:boolean}};
+export type RoastIntensity='MILD'|'SAVAGE'|'APOCALYPSE';
+
+export type AttemptStats={
+  attempts:number;
+  successes:number;
+  failures:number;
+  hintsUsed:number;
+  totalMs:number;
+  lastOutcome:'success'|'failure'|'hint'|'timeout'|'runtime-error'|null;
+  mastery:number;
+};
+
+export type Progress={
+  version:2;
+  currentLayer:number;
+  currentLessonId:string;
+  completedLessons:string[];
+  xp:number;
+  streak:number;
+  longestStreak:number;
+  lastActiveDate:string|null;
+  mastery:Record<string,number>;
+  attempts:Record<string,AttemptStats>;
+  achievements:string[];
+  unlockedBosses:string[];
+  completedBosses:string[];
+  projects:Record<string,{started:boolean;completed:boolean;milestones:string[]}>;
+  interview:{round:number;score:number;rank:string};
+  settings:{roastIntensity:RoastIntensity;sound:boolean;reducedMotion:boolean};
+};
