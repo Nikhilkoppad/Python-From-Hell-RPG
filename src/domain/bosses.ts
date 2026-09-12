@@ -1,20 +1,13 @@
 import type {ChallengeSpec} from './lessons';
 
-export type BossPhase={
- name:string;
- objective:string;
- concept:string;
- starterCode:string;
- expectedOutput:string;
- challenge?:ChallengeSpec;
-};
+export type BossPhase={name:string;objective:string;concept:string;starterCode:string;expectedOutput:string;challenge?:ChallengeSpec};
 export type Boss={id:string;layer:number;name:string;title:string;intro:string;phases:BossPhase[];rewardXp:number};
 const b=(id:string,layer:number,name:string,title:string,intro:string,phases:BossPhase[],rewardXp:number):Boss=>({id,layer,name,title,intro,phases,rewardXp});
 export const bosses:Boss[]=[
  b('loop-demon',3,'LOOP DEMON','THERE IS NO EXIT CONDITION.','Survive iteration, control flow, and nested loops.',[
   {name:'THE COUNT',objective:'Produce 1 through 4 exactly once.',concept:'for / range()',starterCode:'for i in range(1, 5):\n    print(i)',expectedOutput:'1\n2\n3\n4',challenge:{required:[/for\s+\w+\s+in\s+range\s*\(/,/range\s*\(\s*1\s*,\s*5\s*\)/]}},
   {name:'THE ESCAPE',objective:'Print only odd values below 6, then stop at 5.',concept:'break / continue',starterCode:'for i in range(1, 6):\n    if i == 5:\n        break\n    if i % 2 == 0:\n        continue\n    print(i)',expectedOutput:'1\n3',challenge:{required:[/break\b/,/continue\b/,/for\s+/]}},
-  {name:'THE LABYRINTH',objective:'Print a 2 × 3 coordinate grid without duplicate cells.',concept:'nested loops',starterCode:'for row in range(2):\n    for col in range(3):\n        print(f"{row},{col}")',expectedOutput:'0,0\n0,1\n0,2\n1,0\n1,1\n1,2',challenge:{required:[/for\s+\w+\s+in\s+range\s*\(/g,/for\s+\w+\s+in\s+range\s*\(/g]}}
+  {name:'THE LABYRINTH',objective:'Print a 2 × 3 coordinate grid without duplicate cells.',concept:'nested loops',starterCode:'for row in range(2):\n    for col in range(3):\n        print(f"{row},{col}")',expectedOutput:'0,0\n0,1\n0,2\n1,0\n1,1\n1,2',challenge:{required:[/for\s+\w+\s+in\s+range\s*\(/,/for\s+\w+\s+in\s+range\s*\(/]}}
  ],100),
  b('function-lord',5,'FUNCTION LORD','RETURN WITH SOMETHING USEFUL.','Parameters, defaults, scope and closures are now weapons.',[
   {name:'THE CONTRACT',objective:'Write a function that accepts a name and returns a greeting.',concept:'parameters / arguments',starterCode:'def greet(name):\n    return f"Hello, {name}"\n\nprint(greet("Ada"))',expectedOutput:'Hello, Ada',challenge:{required:[/def\s+greet\s*\(\s*name\s*\)/,/return\s+/]}},
@@ -22,9 +15,9 @@ export const bosses:Boss[]=[
   {name:'THE CLOSURE',objective:'Return an inner function that remembers its captured value.',concept:'closures',starterCode:'def multiplier(factor):\n    def apply(value):\n        return value * factor\n    return apply\n\ndouble = multiplier(2)\nprint(double(6))',expectedOutput:'12',challenge:{required:[/def\s+multiplier\s*\(/,/def\s+apply\s*\(/,/return\s+apply/]}}
  ],120),
  b('object-overlord',6,'OBJECT OVERLORD','THE OBJECT HAS A METHOD.','Classes, inheritance and polymorphism converge.',[
-  {name:'THE FORGE',objective:'Initialize and expose object state.',concept:'class / __init__',starterCode:'class Demon:\n    def __init__(self, name):\n        self.name = name\n\nd = Demon("Astaroth")\nprint(d.name)',expectedOutput:'Astaroth',challenge:{required:[/class\s+Demon\b/,/__init__/,self\.name/]}},
+  {name:'THE FORGE',objective:'Initialize and expose object state.',concept:'class / __init__',starterCode:'class Demon:\n    def __init__(self, name):\n        self.name = name\n\nd = Demon("Astaroth")\nprint(d.name)',expectedOutput:'Astaroth',challenge:{required:[/class\s+Demon\b/,/__init__/,/self\.name/]}},
   {name:'THE BLOODLINE',objective:'Override one method in a subclass and call it through the child.',concept:'inheritance',starterCode:'class Animal:\n    def speak(self):\n        return "noise"\n\nclass Dog(Animal):\n    def speak(self):\n        return "woof"\n\nprint(Dog().speak())',expectedOutput:'woof',challenge:{required:[/class\s+Dog\s*\(\s*Animal\s*\)/,/def\s+speak\s*\(/]}},
-  {name:'THE MASK',objective:'Use one interface to handle two concrete implementations.',concept:'polymorphism',starterCode:'class Square:\n    def area(self):\n        return 4\n\nclass Circle:\n    def area(self):\n        return 7\n\nfor shape in (Square(), Circle()):\n    print(shape.area())',expectedOutput:'4\n7',challenge:{required:[/class\s+Square/,/class\s+Circle/,/for\s+shape\s+in/]}},
+  {name:'THE MASK',objective:'Use one interface to handle two concrete implementations.',concept:'polymorphism',starterCode:'class Square:\n    def area(self):\n        return 4\n\nclass Circle:\n    def area(self):\n        return 7\n\nfor shape in (Square(), Circle()):\n    print(shape.area())',expectedOutput:'4\n7',challenge:{required:[/class\s+Square/,/class\s+Circle/,/for\s+shape\s+in/]}}
  ],140),
  b('exception-beast',7,'EXCEPTION BEAST','THE TRACEBACK KNOWS YOUR NAME.','Handle failure without hiding the crime scene.',[
   {name:'THE CATCH',objective:'Catch ValueError and print a recovery message.',concept:'try / except',starterCode:'try:\n    int("hell")\nexcept ValueError:\n    print("recovered")',expectedOutput:'recovered',challenge:{required:[/try\s*:/,/except\s+ValueError\s*:/]}},
