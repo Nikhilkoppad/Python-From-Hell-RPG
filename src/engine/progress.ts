@@ -1,4 +1,5 @@
 import type {Progress,AttemptStats} from '../types/progress';
+import {lessonCatalog} from '../domain/lessons';
 import {updateStreak} from './streaks';
 import {ACHIEVEMENTS,grantAchievement} from './achievements';
 const KEY='python-from-hell:rpg-progress:v3';
@@ -14,7 +15,7 @@ export function loadProgress():Progress|null{try{const raw=localStorage.getItem(
 export function saveProgress(p:Progress){try{localStorage.setItem(KEY,JSON.stringify(p));if(typeof window!=='undefined')window.dispatchEvent(new Event('pfh:progress'))}catch{}}
 export function awardXp(p:Progress,amount:number):Progress{return{...updateStreak(p),xp:Math.max(0,p.xp+Math.max(0,amount))}}
 export function recordAttempt(p:Progress,lessonId:string,success:boolean,hintUsed=false,elapsedMs=0):Progress{const old=p.attempts[lessonId]??blankAttempt();const attempts=old.attempts+1;const successes=old.successes+(success?1:0);const failures=old.failures+(success?0:1);const mastery=Math.max(0,Math.min(100,(old.mastery*.7)+(success?30:-12)+(hintUsed?-5:0)));const lastOutcome:AttemptStats['lastOutcome']=success?'success':'failure';const next:AttemptStats={...old,attempts,successes,failures,hintsUsed:old.hintsUsed+(hintUsed?1:0),totalMs:old.totalMs+Math.max(0,elapsedMs),lastOutcome,mastery:Math.round(mastery*10)/10};return{...updateStreak(p),attempts:{...p.attempts,[lessonId]:next},mastery:{...p.mastery,[lessonId]:next.mastery}}}
-export function completeLesson(p:Progress,id:string):Progress{if(p.completedLessons.includes(id))return p;return{...updateStreak(p),currentLessonId:id,completedLessons:[...p.completedLessons,id],mastery:{...p.mastery,[id]:100},attempts:{...p.attempts,[id]:{...(p.attempts[id]??blankAttempt()),mastery:100,lastOutcome:'success'}}}}
+export function completeLesson(p:Progress,id:string):Progress{if(p.completedLessons.includes(id))return p;const layer=lessonCatalog.find(lesson=>lesson.id===id)?.layer??p.currentLayer;return{...updateStreak(p),currentLayer:Math.max(1,layer),currentLessonId:id,completedLessons:[...p.completedLessons,id],mastery:{...p.mastery,[id]:100},attempts:{...p.attempts,[id]:{...(p.attempts[id]??blankAttempt()),mastery:100,lastOutcome:'success'}}}}
 export function claimLessonReward(p:Progress,id:string,amount:number,noHint=false):Progress{if(p.lessonRewards.includes(id))return p;let achievements=p.achievements;if(noHint)achievements=grantAchievement(achievements,ACHIEVEMENTS.NO_HINTS);return awardXp({...p,lessonRewards:[...p.lessonRewards,id],achievements},amount)}
 export function claimCodingReward(p:Progress):Progress{if(p.codingRewards>0)return p;return awardXp({...p,codingRewards:1,achievements:grantAchievement(p.achievements,ACHIEVEMENTS.FIRST_BLOOD)},20)}
 export function claimDebugReward(p:Progress,caseId:string):Progress{if(p.debugRewards.includes(caseId))return p;return awardXp({...p,debugRewards:[...p.debugRewards,caseId],achievements:grantAchievement(p.achievements,ACHIEVEMENTS.BUG_SLAYER)},40)}
