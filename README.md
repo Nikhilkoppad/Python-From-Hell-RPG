@@ -16,7 +16,8 @@ A story-driven Python learning RPG, browser coding IDE, debugging dungeon, boss 
 - Portable v3 save export/import with validation, plus local-save reset
 - Seven multi-phase bosses with executable coding gates and persisted phase progress
 - Eight debugging dungeon cases with executable fix checks
-- 30-question interview battle arena across fundamentals, advanced Python, and runtime topics
+- 30-question interview battle arena with full rank ladder, explanation/follow-up retry flow, and targeted code tasks
+- The Core finale unlocks a dedicated runtime-access cinematic after the final boss is cleared
 - Six executable project tracks with contract tests, persistent started/completed state, and one-time completion rewards
 - PYTHONSURA AI mentor with optional OpenAI-compatible endpoint and deterministic offline fallback
 - Functional settings for roast intensity, sound preference, reduced motion, portable saves, and local-save reset
@@ -31,7 +32,7 @@ npm run build
 npm run dev
 ```
 
-`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, runtime cancellation, adaptive learning wiring, lesson drafts, accessibility feedback, save portability, mobile navigation, the single active application entrypoint, and other anti-regression contracts. GitHub Actions runs verification before the production build.
+`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, runtime cancellation, adaptive learning wiring, lesson drafts, accessibility feedback, save portability, mobile navigation, the single active application entrypoint, interview progression contracts, and other anti-regression rules. GitHub Actions runs verification before the production build.
 
 ## Runtime targets
 
@@ -43,7 +44,7 @@ Set `VITE_MENTOR_ENDPOINT` and optionally `VITE_MENTOR_MODEL` for an OpenAI-comp
 
 ## Architecture
 
-`src/domain` contains curriculum and experience data. `src/engine` contains progression, rewards, adaptive logic, challenges, streaks, and unlocks. `src/execution` isolates browser Python execution. `src/components` contains interactive workspaces. `src/ai` contains the provider-neutral mentor adapter.
+`src/domain` contains curriculum and experience data. `src/engine` contains progression, rewards, adaptive logic, challenges, streaks, and unlocks. `src/execution` isolates browser Python execution. `src/components` contains interactive workspaces, including the interview battle arena. `src/ai` contains the provider-neutral mentor adapter. Root-level UI polish styles are imported by `src/main.tsx`.
 
 The core loop is:
 
