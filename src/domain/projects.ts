@@ -1,0 +1,34 @@
+export type ProjectMilestone = {
+  id: string;
+  title: string;
+  objective: string;
+  acceptance: string[];
+};
+
+export type Project = {
+  id: string;
+  tier: 'beginner' | 'intermediate' | 'advanced';
+  title: string;
+  brief: string;
+  skills: string[];
+  milestones: ProjectMilestone[];
+  rewardXp: number;
+};
+
+export const projects: Project[] = [
+  { id: 'calculator', tier: 'beginner', title: 'HELL CALCULATOR', brief: 'Build a command-line calculator with explicit error handling.', skills: ['input', 'type conversion', 'conditions', 'functions'], milestones: [
+    { id: 'p1', title: 'Parse input', objective: 'Accept two numbers and an operator.', acceptance: ['supports + - * /'] },
+    { id: 'p2', title: 'Handle failure', objective: 'Reject invalid operators and division by zero.', acceptance: ['clear error message', 'program remains usable'] },
+    { id: 'p3', title: 'Extract logic', objective: 'Move calculation into a function.', acceptance: ['function returns the result'] },
+  ], rewardXp: 150 },
+  { id: 'expense-tracker', tier: 'intermediate', title: 'SOUL EXPENSE TRACKER', brief: 'Model expenses, summarize categories, and detect malformed entries.', skills: ['collections', 'functions', 'validation', 'data processing'], milestones: [
+    { id: 'e1', title: 'Model records', objective: 'Represent one expense consistently.', acceptance: ['amount and category are available'] },
+    { id: 'e2', title: 'Aggregate', objective: 'Compute totals by category.', acceptance: ['missing categories do not crash the report'] },
+    { id: 'e3', title: 'Validate', objective: 'Reject malformed expense data.', acceptance: ['errors identify the bad field'] },
+  ], rewardXp: 250 },
+  { id: 'debug-utility', tier: 'advanced', title: 'TRACEBACK FORENSICS', brief: 'Build a debugging utility that captures failures and summarizes recurring exceptions.', skills: ['exceptions', 'tracebacks', 'logging', 'analysis'], milestones: [
+    { id: 'd1', title: 'Capture failure', objective: 'Record exception type and message.', acceptance: ['exception details are preserved'] },
+    { id: 'd2', title: 'Summarize', objective: 'Group failures by exception type.', acceptance: ['counts are deterministic'] },
+    { id: 'd3', title: 'Explain', objective: 'Produce a concise remediation hint for known error classes.', acceptance: ['unknown errors remain clearly unknown'] },
+  ], rewardXp: 400 },
+];
