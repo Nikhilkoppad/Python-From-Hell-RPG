@@ -4,21 +4,22 @@ A story-driven Python learning RPG, browser coding IDE, debugging dungeon, boss 
 
 ## Current build
 
-- HellGate onboarding with persistent resume state
+- HellGate onboarding with persistent resume state and a real fresh-start reset path
 - Command Center + 12-layer curriculum
 - 70 data-driven lessons from Python basics to CPython internals
-- Browser Python execution in a Web Worker using Pyodide
+- Browser Python execution in a Web Worker using Pyodide, with a warm worker between sequential runs
 - Execution errors, stderr/stdout capture, timeout protection, cancellation, and worker isolation
 - Lesson challenges with required concepts and client-side private behavior harnesses
 - Adaptive attempts: successes, failures, hint usage, elapsed time, mastery, remediation-oriented hint progression
 - XP, levels, streaks, achievements, one-time activity rewards, and versioned local persistence
+- Portable save export/import with validation, plus local-save reset
 - Seven multi-phase bosses with executable coding gates and persisted phase progress
 - Eight debugging dungeon cases with executable fix checks
 - 30-question interview battle arena across fundamentals, advanced Python, and runtime topics
 - Six executable project tracks with contract tests and one-time completion rewards
 - PYTHONSURA AI mentor with optional OpenAI-compatible endpoint and deterministic offline fallback
 - Functional settings for roast intensity, sound preference, reduced motion, and local-save reset
-- Story signals, responsive layout, keyboard shortcuts, visible focus states, reduced-motion handling, and crash recovery
+- Story signals, responsive desktop/tablet/mobile navigation, keyboard shortcuts, visible focus states, reduced-motion handling, and crash recovery
 
 ## Development
 
@@ -29,7 +30,7 @@ npm run build
 npm run dev
 ```
 
-`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, and active application wiring. GitHub Actions runs verification before the production build.
+`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, runtime cancellation, accessibility feedback, save portability, and active application wiring. GitHub Actions runs verification before the production build.
 
 ## Runtime targets
 
