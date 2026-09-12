@@ -1,40 +1,12 @@
 import {readFile} from 'node:fs/promises';
 
-const lessons=await readFile('src/domain/lessons.ts','utf8');
-const curriculum=await readFile('src/domain/curriculum.ts','utf8');
-const app=await readFile('src/AppFinal.tsx','utf8');
-const debugging=await readFile('src/domain/debugging.ts','utf8');
-const interview=await readFile('src/domain/interview.ts','utf8');
-const bosses=await readFile('src/domain/bosses.ts','utf8');
-const projects=await readFile('src/domain/projects.ts','utf8');
-const projectUi=await readFile('src/components/ProjectFactory.tsx','utf8');
+const [lessons,curriculum,app,debugging,interview,bosses,projects,projectUi,packageJson]=await Promise.all([
+ readFile('src/domain/lessons.ts','utf8'),readFile('src/domain/curriculum.ts','utf8'),readFile('src/AppFinal.tsx','utf8'),readFile('src/domain/debugging.ts','utf8'),readFile('src/domain/interview.ts','utf8'),readFile('src/domain/bosses.ts','utf8'),readFile('src/domain/projects.ts','utf8'),readFile('src/components/ProjectFactory.tsx','utf8'),readFile('package.json','utf8')
+]);
+const packageData=JSON.parse(packageJson);
 const requiredLayers=Array.from({length:12},(_,i)=>i+1);
-for(const layer of requiredLayers){
- if(!new RegExp(`layer:${layer}\\b`).test(lessons))throw new Error(`Missing lesson coverage for layer ${layer}`);
- if(!new RegExp(`number:${layer}\\b`).test(curriculum))throw new Error(`Missing curriculum layer ${layer}`);
-}
-const lessonCount=(lessons.match(/id:'l/g)||[]).length;
-const debugCount=(debugging.match(/id:'/g)||[]).length;
-const interviewCount=(interview.match(/q\('i/g)||[]).length;
-const bossCount=(bosses.match(/b\('/g)||[]).length;
-const phaseCount=(bosses.match(/starterCode:/g)||[]).length;
-const projectCount=(projects.match(/\bid:'[^']+',tier:'/g)||[]).length;
-const projectValidationCount=(projects.match(/validation:\{requiredPatterns:/g)||[]).length;
-if(lessonCount<50)throw new Error(`Expected a deep curriculum, found only ${lessonCount} lesson entries`);
-if(debugCount<8)throw new Error(`Expected at least 8 debugging cases, found ${debugCount}`);
-if(interviewCount!==30)throw new Error(`Expected exactly 30 interview questions, found ${interviewCount}`);
-if(bossCount!==7)throw new Error(`Expected exactly 7 bosses, found ${bossCount}`);
-if(phaseCount<21)throw new Error(`Expected at least 21 executable boss phases, found ${phaseCount}`);
-if(projectCount<6)throw new Error(`Expected at least 6 project tracks, found ${projectCount}`);
-if(projectValidationCount!==projectCount)throw new Error(`Every project must have an executable validation contract (${projectValidationCount}/${projectCount})`);
-if(!/RUN\s*&\s*TEST/.test(projectUi))throw new Error('Project Factory test action is missing');
-if(!/claimOneTimeProjectReward/.test(projectUi))throw new Error('Project reward guard is not wired into the Project Factory');
-if(!/LessonWorkspace/.test(app))throw new Error('Lesson workspace is not wired into the active app');
-if(!/SettingsPanel/.test(app))throw new Error('Settings panel is not wired into the active app');
-if(!/DebuggingDungeon/.test(app))throw new Error('Debugging dungeon is not wired into the active app');
-if(!/evaluateBossPhase/.test(app))throw new Error('Boss evaluator is not wired into the active app');
-if(!/claimBossReward/.test(app))throw new Error('Boss reward guard is not wired into the active app');
-if(!/claimInterviewReward/.test(app))throw new Error('Interview reward guard is not wired into the active app');
-if(/alert\s*\(/.test(app))throw new Error('Fake alert-based interaction remains in the active app');
-if(/onClick=\{\(\)=>\{\}\}/.test(app))throw new Error('Empty click handler detected');
+for(const layer of requiredLayers){if(!new RegExp(`layer:${layer}\\b`).test(lessons))throw new Error(`Missing lesson coverage for layer ${layer}`);if(!new RegExp(`number:${layer}\\b`).test(curriculum))throw new Error(`Missing curriculum layer ${layer}`)}
+const lessonCount=(lessons.match(/id:'l/g)||[]).length;const debugCount=(debugging.match(/id:'/g)||[]).length;const interviewCount=(interview.match(/q\('i/g)||[]).length;const bossCount=(bosses.match(/b\('/g)||[]).length;const phaseCount=(bosses.match(/\{name:'[^']+',objective:/g)||[]).length;const projectCount=(projects.match(/\bid:'[^']+',tier:'/g)||[]).length;const projectValidationCount=(projects.match(/validation:\{requiredPatterns:/g)||[]).length;
+if(lessonCount<70)throw new Error(`Expected at least 70 lesson entries, found ${lessonCount}`);if(debugCount<8)throw new Error(`Expected at least 8 debugging cases, found ${debugCount}`);if(interviewCount!==30)throw new Error(`Expected exactly 30 interview questions, found ${interviewCount}`);if(bossCount!==7)throw new Error(`Expected exactly 7 bosses, found ${bossCount}`);if(phaseCount!==21)throw new Error(`Expected exactly 21 executable boss phases, found ${phaseCount}`);if(projectCount!==6)throw new Error(`Expected exactly 6 project tracks, found ${projectCount}`);if(projectValidationCount!==projectCount)throw new Error(`Every project must have an executable validation contract (${projectValidationCount}/${projectCount})`);if(packageData.version!=='1.0.0')throw new Error(`Expected package version 1.0.0, found ${packageData.version}`);
+if(!/RUN\s*&\s*TEST/.test(projectUi))throw new Error('Project Factory test action is missing');if(!/claimOneTimeProjectReward/.test(projectUi))throw new Error('Project reward guard is not wired into the Project Factory');if(!/LessonWorkspace/.test(app))throw new Error('Lesson workspace is not wired into the active app');if(!/SettingsPanel/.test(app))throw new Error('Settings panel is not wired into the active app');if(!/DebuggingDungeon/.test(app))throw new Error('Debugging dungeon is not wired into the active app');if(!/evaluateBossPhase/.test(app))throw new Error('Boss evaluator is not wired into the active app');if(!/claimBossReward/.test(app))throw new Error('Boss reward guard is not wired into the active app');if(!/claimInterviewReward/.test(app))throw new Error('Interview reward guard is not wired into the active app');if(!/XP_REWARDS\.lesson\+XP_REWARDS\.challenge/.test(/\{?/.test(app)?app:''))throw new Error('Lesson workspace does not award lesson + challenge XP together');if(/alert\s*\(/.test(app))throw new Error('Fake alert-based interaction remains in the active app');if(/onClick=\{\(\)=>\{\}\}/.test(app))throw new Error('Empty click handler detected');
 console.log(`Content checks passed: ${lessonCount} lessons, ${debugCount} debugging cases, ${interviewCount} interview questions, ${bossCount} bosses / ${phaseCount} phases, ${projectCount} executable projects, 12 Hell layers.`);
