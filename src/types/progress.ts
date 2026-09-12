@@ -1,0 +1,1 @@
+export type Progress={version:1;currentLayer:number;currentLessonId:string;completedLessons:string[];xp:number;streak:number;mastery:Record<string,number>;achievements:string[];settings:{roastIntensity:'MILD'|'SAVAGE'|'APOCALYPSE';sound:boolean;reducedMotion:boolean}};
