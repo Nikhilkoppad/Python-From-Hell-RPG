@@ -1,0 +1,55 @@
+import {useEffect,useState,type Dispatch,type SetStateAction} from 'react';
+import {ChevronRight,Play,RotateCcw,Trophy} from 'lucide-react';
+import {projects} from '../domain/projects';
+import {claimOneTimeProjectReward} from '../engine/rewardGuard';
+import {PythonRunner} from '../execution/PythonRunner';
+import type {Progress} from '../types/progress';
+
+type Props={progress:Progress;setProgress:Dispatch<SetStateAction<Progress>>};
+
+function useRunner(){const [runner]=useState(()=>new PythonRunner());useEffect(()=>()=>runner.dispose(),[runner]);return runner}
+
+export function ProjectFactory({progress,setProgress}:Props){
+ const [index,setIndex]=useState(0);
+ const project=projects[index];
+ const [code,setCode]=useState(project.starterCode);
+ const [output,setOutput]=useState('');
+ const [message,setMessage]=useState('');
+ const [running,setRunning]=useState(false);
+ const state=progress.projects[project.id]??{started:false,completed:false,milestones:[]};
+ const runner=useRunner();
+ useEffect(()=>{setCode(project.starterCode);setOutput('');setMessage('')},[project.id,project.starterCode]);
+ const run=async()=>{
+  if(running)return;
+  setRunning(true);
+  setMessage('Running your project, then executing its contract tests…');
+  const visible=await runner.run(code);
+  setOutput(visible.error?`ERROR\n${visible.error}`:visible.stdout||'(no output)');
+  if(visible.error){setMessage(`Project stopped: ${visible.error}`);setRunning(false);return}
+  for(const pattern of project.validation.requiredPatterns??[]){
+   if(!pattern.test(code)){setMessage(`Contract blocked: required implementation concept is missing (${pattern.source}).`);setRunning(false);return}
+  }
+  const encoded=JSON.stringify(code);
+  const harness=JSON.stringify(project.validation.harness);
+  const testProgram=`_src=${encoded}\n_ns={}\nexec(compile(_src,'<project>','exec'),_ns,_ns)\nexec(compile(${harness},'<project-tests>','exec'),_ns,_ns)\nprint('PROJECT_TESTS_PASSED')`;
+  const tested=await runner.run(testProgram);
+  if(tested.error){setMessage(`Contract failed: ${tested.error}`);setRunning(false);return}
+  setMessage(project.validation.successMessage??'Project contract passed.');
+  setProgress(p=>{
+   const completedMilestones=project.milestones.map(m=>m.id);
+   const next={...p,projects:{...p.projects,[project.id]:{started:true,completed:true,milestones:completedMilestones}}};
+   return claimOneTimeProjectReward(next,project.id,project.rewardXp);
+  });
+  setRunning(false);
+ };
+ const reset=()=>{setCode(project.starterCode);setOutput('');setMessage('Starter contract restored. No progress was deleted.')};
+ const nextProject=()=>setIndex(i=>(i+1)%projects.length);
+ return <div className="page">
+  <div className="section-heading"><div><div className="eyebrow">PROJECT FACTORY // {project.tier.toUpperCase()}</div><h1>{project.title}</h1></div><button className="back-btn" onClick={nextProject}>NEXT PROJECT <ChevronRight size={15}/></button></div>
+  <p className="lead">{project.brief} <b>Complete the executable contract to clear the project.</b></p>
+  <div className="panel project-contract"><div className="project-contract-top"><div><span className="eyebrow">MISSION CONTRACT</span><h2>{project.firstTask}</h2></div><div className="project-reward"><Trophy size={16}/><b>+{project.rewardXp} XP</b></div></div><div className="project-skills">{project.skills.map(skill=><span key={skill}>{skill}</span>)}</div></div>
+  <div className="arena"><textarea spellCheck={false} value={code} onChange={e=>setCode(e.target.value)} aria-label={`${project.name} project editor`} onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();void run()}}}/><div className="arena-side"><div className="editor-actions"><button className="run-btn" disabled={running} onClick={()=>void run()}>{running?'TESTING…':'RUN & TEST'} <Play size={15}/></button><button onClick={reset}><RotateCcw size={14}/> RESET</button></div><div className="terminal-output"><div>PROJECT OUTPUT</div><pre>{output||'Run the project to see stdout. Contract tests run after a clean execution.'}</pre></div></div></div>
+  {message&&<div className={`panel feedback ${state.completed?'success-row':''}`}>{message}</div>}
+  <div className="panel project-plan"><div className="eyebrow">MILESTONES</div>{project.milestones.map(m=><div key={m.id} className="milestone"><span className={`milestone-state ${state.milestones.includes(m.id)?'done':''}`}>{state.milestones.includes(m.id)?'✓':'○'}</span><span><b>{m.title}</b>{m.objective}<small>{m.acceptance.join(' · ')}</small></span></div>)}</div>
+ </div>;
+}
