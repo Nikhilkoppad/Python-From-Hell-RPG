@@ -1,36 +1,12 @@
-export type Boss = {
-  id: string;
-  layer: number;
-  name: string;
-  title: string;
-  intro: string;
-  phases: Array<{ name: string; objective: string; concept: string }>;
-  rewardXp: number;
-};
-
-export const bosses: Boss[] = [
-  { id: 'loop-demon', layer: 3, name: 'LOOP DEMON', title: 'There is no exit condition.', intro: 'Survive iteration, control flow, and nested loops.', phases: [
-    { name: 'THE COUNT', objective: 'Use range() to produce the exact sequence.', concept: 'iteration' },
-    { name: 'THE ESCAPE', objective: 'Stop at the correct moment without skipping valid work.', concept: 'break / continue' },
-    { name: 'THE LABYRINTH', objective: 'Control a nested loop without duplicating output.', concept: 'nested loops' },
-  ], rewardXp: 100 },
-  { id: 'function-lord', layer: 5, name: 'FUNCTION LORD', title: 'Return with something useful.', intro: 'Parameters, defaults, scope, and closures are now weapons.', phases: [
-    { name: 'THE CONTRACT', objective: 'Match parameters to arguments correctly.', concept: 'parameters' },
-    { name: 'THE SCOPE', objective: 'Predict which binding a function resolves.', concept: 'scope' },
-    { name: 'THE CLOSURE', objective: 'Preserve state without global variables.', concept: 'closures' },
-  ], rewardXp: 100 },
-  { id: 'memory-reaper', layer: 10, name: 'MEMORY REAPER', title: 'References never forget.', intro: 'Separate Python semantics from CPython implementation behavior.', phases: [
-    { name: 'IDENTITY', objective: 'Distinguish identity from equality.', concept: 'is vs ==' },
-    { name: 'LIFETIME', objective: 'Predict when an object can become unreachable.', concept: 'object lifetime' },
-    { name: 'THE COLLECTOR', objective: 'Explain cyclic garbage collection without hand-waving.', concept: 'GC' },
-  ], rewardXp: 150 },
-  { id: 'cpython-core', layer: 12, name: 'CPYTHON CORE DEMON', title: 'Explain the machine beneath the language.', intro: 'Advanced runtime questions require exact version labels.', phases: [
-    { name: 'BYTECODE', objective: 'Inspect bytecode and explain what it represents.', concept: 'dis / bytecode' },
-    { name: 'OBJECTS', objective: 'Describe PyObject-level concepts without conflating them with the language spec.', concept: 'PyObject' },
-    { name: 'RUNTIME', objective: 'Connect interpreter execution, memory, and concurrency concepts.', concept: 'runtime architecture' },
-  ], rewardXp: 250 },
+export type Boss={id:string;layer:number;name:string;title:string;intro:string;phases:Array<{name:string;objective:string;concept:string}>;rewardXp:number};
+const b=(id:string,layer:number,name:string,title:string,intro:string,phases:Boss['phases'],rewardXp:number):Boss=>({id,layer,name,title,intro,phases,rewardXp});
+export const bosses:Boss[]=[
+b('loop-demon',3,'LOOP DEMON','THERE IS NO EXIT CONDITION.','Survive iteration, control flow, and nested loops.',[{name:'THE COUNT',objective:'Produce the exact sequence with range().',concept:'for / range()'},{name:'THE ESCAPE',objective:'Stop at the correct moment without skipping valid work.',concept:'break / continue'},{name:'THE LABYRINTH',objective:'Control a nested loop without duplicating output.',concept:'nested loops'}],100),
+b('function-lord',5,'FUNCTION LORD','RETURN WITH SOMETHING USEFUL.','Parameters, defaults, scope and closures are now weapons.',[{name:'THE CONTRACT',objective:'Match parameters to arguments correctly.',concept:'parameters / arguments'},{name:'THE SCOPE',objective:'Predict which binding a function resolves.',concept:'LEGB / nonlocal'},{name:'THE CLOSURE',objective:'Preserve state without global variables.',concept:'closures'}],120),
+b('object-overlord',6,'OBJECT OVERLORD','THE OBJECT HAS A METHOD.','Classes, inheritance and polymorphism converge.',[{name:'THE FORGE',objective:'Initialize object state correctly.',concept:'class / __init__'},{name:'THE BLOODLINE',objective:'Use inheritance without breaking substitution.',concept:'inheritance'},{name:'THE MASK',objective:'Make two objects honor a common interface.',concept:'polymorphism'}],140),
+b('exception-beast',7,'EXCEPTION BEAST','THE TRACEBACK KNOWS YOUR NAME.','Handle failure without hiding the crime scene.',[{name:'THE CATCH',objective:'Catch the exact expected exception.',concept:'try / except'},{name:'THE SIGNAL',objective:'Raise a meaningful exception.',concept:'raise'},{name:'THE CLEANUP',objective:'Guarantee cleanup with finally.',concept:'finally'}],140),
+b('concurrency-hydra',9,'CONCURRENCY HYDRA','EVERY HEAD SHARES STATE.','Threads, locks and async scheduling test your discipline.',[{name:'THE RACE',objective:'Identify the shared state hazard.',concept:'race condition'},{name:'THE LOCK',objective:'Protect one critical section.',concept:'threading.Lock'},{name:'THE AWAIT',objective:'Explain cooperative coroutine scheduling.',concept:'async / await'}],180),
+b('memory-reaper',10,'MEMORY REAPER','REFERENCES HAVE CONSEQUENCES.','Separate language semantics from CPython memory behavior.',[{name:'IDENTITY',objective:'Distinguish equality from identity.',concept:'== / is'},{name:'LIFETIME',objective:'Reason about reachability and aliases.',concept:'references / lifetime'},{name:'THE COLLECTOR',objective:'Explain cyclic garbage collection precisely.',concept:'GC / CPython'}],200),
+b('cpython-core',12,'CPYTHON CORE DEMON','EXPLAIN THE MACHINE BENEATH THE LANGUAGE.','Advanced runtime questions require version labels and evidence.',[{name:'BYTECODE',objective:'Inspect bytecode for one target runtime.',concept:'dis / code objects'},{name:'OBJECTS',objective:'Explain PyObject-level concepts without calling them language guarantees.',concept:'PyObject / C API'},{name:'THE CORE',objective:'Connect interpreter execution, free-threading, JIT and performance without hand-waving.',concept:'CPython 3.13+ internals'}],300),
 ];
-
-export function bossForLayer(layer: number): Boss | undefined {
-  return bosses.find((boss) => boss.layer === layer);
-}
+export function bossForLayer(layer:number):Boss|undefined{return bosses.find(boss=>boss.layer===layer)}
