@@ -6,19 +6,26 @@ A story-driven Python learning RPG, coding IDE, debugging dungeon, boss gauntlet
 
 - HellGate onboarding and persistent resume state
 - Command Center + curriculum navigation across 12 Hell layers
-- Lesson workspace with real browser-side Python execution
-- Pyodide Web Worker isolation, runtime errors, and 5-second execution protection
-- Data-driven lessons, challenges, boss phases, interview questions, projects, and story events
-- Adaptive attempt tracking: successes, failures, hints, time, mastery, remediation-oriented hints
-- XP, levels, achievements, streaks, one-time project/boss rewards, and local persistence
-- Optional AI mentor through a generic OpenAI-compatible endpoint, with a local fallback when no provider is configured
+- 70+ data-driven lessons spanning fundamentals through CPython internals
+- Lesson workspace with browser-side Python execution in an isolated Web Worker
+- Pyodide runtime errors and 5-second execution protection
+- Executable lesson challenges with concept requirements and private behavior harnesses
+- Adaptive attempt tracking: successes, failures, hints, time, mastery and remediation-oriented hints
+- XP, levels, achievements, streaks, one-time project/boss rewards and local persistence
+- Seven boss encounters with multi-phase progression
+- 30-question interview gauntlet
+- Six project tracks with milestone persistence
+- Optional AI mentor through a generic OpenAI-compatible endpoint, with deterministic local fallback
 - Error boundary so a UI crash can recover without silently destroying saved progress
-- Responsive game HUD with reduced-motion friendly foundations
-- CPython 3.13 implementation-focused lessons explicitly separated from the browser runtime target
+- Responsive game HUD with reduced-motion foundations
+- CPython implementation lessons explicitly separated from the browser runtime target
+- Automated content verification in CI before the TypeScript/Vite build
 
 ## Run
 
 `npm install`
+
+`npm run verify`
 
 `npm run dev`
 
@@ -26,7 +33,7 @@ A story-driven Python learning RPG, coding IDE, debugging dungeon, boss gauntlet
 
 ## Runtime targets
 
-The browser execution layer uses the stable Pyodide 314.0.6 distribution, which packages CPython 3.14.2. Advanced implementation lessons separately target CPython 3.13 so version-sensitive internals are not presented as generic Python language guarantees.
+The browser execution layer uses Pyodide 314.0.6, the current stable Pyodide release, which packages CPython 3.14.2. Advanced implementation lessons separately target CPython 3.13 so version-sensitive internals are not presented as generic Python language guarantees.
 
 ## AI mentor
 
@@ -34,6 +41,6 @@ Set `VITE_MENTOR_ENDPOINT` and optionally `VITE_MENTOR_MODEL` to connect an Open
 
 ## Architecture
 
-`src/domain` contains curriculum/content schemas. `src/engine` contains progression, adaptive learning, rewards, challenges, streaks, and unlock logic. `src/execution` isolates Python execution. `src/components` contains the interactive workspaces. `src/ai` contains the provider-neutral mentor adapter.
+`src/domain` contains curriculum/content schemas. `src/engine` contains progression, adaptive learning, rewards, challenges, streaks and unlock logic. `src/execution` isolates Python execution. `src/components` contains interactive workspaces. `src/ai` contains the provider-neutral mentor adapter.
 
-A GitHub Actions workflow builds the project on pushes and pull requests to `main`.
+GitHub Actions runs `npm run verify` and then `npm run build` on pushes and pull requests to `main`.
