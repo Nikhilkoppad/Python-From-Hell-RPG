@@ -6,11 +6,11 @@ Python From Hell is a playable learning world, not a decorated course dashboard.
 
 **A dangerous Python dungeon where the teacher is a character.** The learner is the protagonist. Pythosura is the instructor, judge, demon and boss. Mini-Pythosura is the companion. Code execution is the weapon. Mastery opens the gates.
 
-## North-star interaction
+## North-star experience
 
 `LANGUAGE → CINEMATIC WAKE → EXPLORE → DIAGNOSE → TEACH → TALK → WRITE → RUN → REACT → ROAST → EXPLAIN → RETRY → MASTER → DESCEND`
 
-The user should feel that something is happening in a world, not that a web page is changing cards.
+Every screen should answer: **where am I, what is happening, what do I do next, and why does it matter?** The user should feel that something is happening in a world, not that a web page is changing cards.
 
 ## HellGate rules
 
