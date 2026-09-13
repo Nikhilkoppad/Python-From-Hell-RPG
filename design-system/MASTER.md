@@ -1,113 +1,137 @@
 # PYTHON FROM HELL — MASTER DESIGN SYSTEM
 
-This is the shipped visual/interaction source of truth for the RPG. It applies design-intelligence principles associated with UI/UX Pro Max while keeping Python From Hell's own identity.
+Python From Hell is a playable learning world, not a decorated course dashboard.
 
 ## Product idea
 
-**A dangerous tutor that turns Python learning into a survival adventure.** The learner wakes in Hell, meets Pythonsura, enters the dungeon, learns under pressure, writes real code, survives mistakes, and opens gates through mastery.
+**A dangerous Python dungeon where the teacher is a character.** The learner is the protagonist. Pythosura is the instructor, judge, demon and boss. Mini-Pythosura is the companion. Code execution is the weapon. Mastery opens the gates.
 
-The product is a game with a learning system, not a learning dashboard with game decoration.
+## North-star interaction
 
-## North-star experience
+`LANGUAGE → CINEMATIC WAKE → EXPLORE → DIAGNOSE → TEACH → TALK → WRITE → RUN → REACT → ROAST → EXPLAIN → RETRY → MASTER → DESCEND`
 
-`WAKE → STORY → CHOOSE → ENTER DUNGEON → MEET PYTHONSURA → DIAGNOSTIC → TEACH → DOUBT → ADAPT → WRITE → RUN → REACT → ROAST → EXPLAIN → RETRY → MASTER → OPEN GATE`
+The user should feel that something is happening in a world, not that a web page is changing cards.
 
-Every screen should answer four things immediately: **Where am I? What am I doing? Why am I doing it? What happens next?**
+## HellGate rules
 
-## HellGate composition
+The first interaction is language selection: English or Hinglish. The choice propagates through story dialogue, teacher dialogue, speech, questions, hints, reactions, roasting, explanations and AI mentor context.
 
-The opening is a cinematic sequence, not a welcome dashboard:
-1. Darkness and disorientation.
-2. Restrained chaos cues: screaming, shouting, metal, demons and distant Hell ambience.
-3. Ground shake and Pythonsura arrival.
-4. One-chance escape proposition.
-5. Accept/reject tension.
-6. Giant mouth/portal entry.
-7. Mini-Pythonsura guide introduction.
-8. Guide accept/reject, with mandatory guide after rejection.
-9. English/Hinglish choice.
-10. Final descent into the first dungeon chamber.
+After language selection, the opening is a real-time 3D cinematic scene. The camera is the learner's point of view. Darkness gives way to fire, smoke, fog, ruins, moving silhouettes and environmental sound. Pythosura physically emerges from the ground, reacts, opens his jaw and reveals the dungeon portal. Mini-Pythosura physically enters the scene as the companion.
 
-Story motion must have narrative meaning. The system must never use random motion merely to make the screen look busy.
+The scene uses purposeful camera movement, body animation, facial-light cues, environmental lighting, particles and sound. Text is limited to subtitles, essential choices and accessibility copy; it is never the primary carrier of the story.
 
-## Living Classroom
+## 3D direction
 
-Once inside the dungeon, the lesson becomes the stage and Pythonsura becomes the instructor.
+Use Three.js for real-time 3D. Prefer a stylized game-real visual language over photorealism: believable depth, fog, warm fire pools, hard shadows and readable character shapes.
 
-`STORY → DIAGNOSTIC → MICRO-TEACH → DOUBT CHECK → ADAPTIVE RE-TEACH → PROGRESSIVE TRIAL → REAL EXECUTION → REACTION → RETRY → MASTERY`
+Pythosura is a literal 3D demon snake rig with an animated head, glowing eyes, horns, jaw, teeth and portal mouth. Mini-Pythosura is the same character language at companion scale.
 
-The teacher is visually dominant. The editor is the learner's weapon. The runtime is the judge. The gate is the reward.
+Environments should have a reason to exist: cave/ruin architecture, torches, lava, smoke, Python markings, dangerous paths and gates. Avoid decorative geometry whose only purpose is to fill space.
+
+## Sound direction
+
+Sound is part of gameplay. The HellGate uses a layered procedural audio system so the experience does not depend on a pile of external copyrighted assets.
+
+Ambient bed:
+- low sub/bass Hell drone
+- wind/noise bed
+- sparse fire crackle
+- occasional chain movement
+- distant low creature texture
+
+Interactive SFX:
+- ground quake
+- heavy impact
+- demon roar
+- jaw/portal activation
+- sparks
+- footsteps
+- comedic laugh/reaction
+
+Voice:
+- browser/local speech synthesis performs character dialogue with different pitch/rate profiles for learner and demon
+- Hinglish uses an Indian Hindi voice locale when the browser offers one
+- captions remain available because synthesized voice is additive, not a requirement
+
+## Meme + reaction direction
+
+Reactions must be **situation-aware**. The director asks what happened before choosing a line, voice delivery, camera response, animation and temporary meme treatment.
+
+Examples of contexts:
+- careless syntax error
+- repeated same mistake
+- successful recovery
+- unexpectedly brilliant answer
+- boss pressure
+- interview confidence collapse
+- suspiciously fast success
+
+Do not place memes on screen randomly. Do not endlessly repeat one tiny fixed meme list. Keep the reaction bank extensible and rotate variants by context and session state.
+
+Comedy rhythm:
+
+`TENSION → SILENCE → CHARACTER LOOK → ABSURD REACTION → ROAST → TECHNICAL EXPLANATION → NEXT MOVE`
+
+## Tutor rules
+
+Pythosura is a literal instructor, not a chatbot widget. He should ask what the learner tried, inspect actual code/output/errors, teach one idea at a time, answer questions, switch explanation strategy when the learner is confused, and require demonstrated mastery.
+
+Teaching modes should include:
+1. very simple explanation
+2. real-life analogy
+3. visual explanation
+4. line-by-line code walkthrough
+5. interactive manipulation
+
+External learning resources may be surfaced only when they are relevant to the exact confusion.
+
+Profanity is fictional character flavor. It can be strong and context-aware, but it must target the learner's in-game performance or code behavior, not protected traits or inherent worth.
+
+## Lesson gameplay
+
+Each concept follows:
+
+`STORY → DIAGNOSTIC → TEACH → DOUBT → ADAPT → PRACTICE → EXECUTE → REACT → RETRY → PROVE`
+
+The learner does not progress because they clicked a button. Progress requires actual executable behavior and repeated evidence of understanding.
 
 ## Visual language
 
-- Deep black foundation with volcanic red/orange action color and restrained bruised-purple depth.
-- Strong editorial typography for story moments; compact monospace for system labels and code.
-- Sharp panels with deliberate hierarchy rather than a pile of floating cards.
-- Texture from light, shadow, grain-like gradients and meaningful movement.
-- Dungeon motifs: darkness, smoke, gates, carved Python symbols, torches, cracks, portals and restrained creature silhouettes.
+Deep black foundation with volcanic red/orange firelight and restrained bruised-purple depth. Use strong editorial headings, compact monospace system text and clean code typography.
 
-Avoid generic cyberpunk, rotating octagons, random polygons, excessive particles, fake telemetry, dashboard clutter and unexplained futuristic widgets.
-
-## Pythonsura personality
-
-Pythonsura is an intelligent Indian-style developer demon and teacher. In English mode he speaks English with aggressive developer humor. In Hinglish mode he speaks primarily Hinglish with Indian-style roasting and gaalis. Technical teaching stays accurate.
-
-Roasts are contextual. They target the learner's current coding performance, mistake or game situation, not protected classes or inherent personal worth. The comedy must lead into a useful explanation or next action.
-
-Pythonsura can:
-- diagnose prior knowledge;
-- explain like the learner is a beginner;
-- demonstrate code before demanding it;
-- answer free-form questions;
-- remember the lesson conversation;
-- inspect actual code and runtime results;
-- switch Teacher / Comedy / Battle / Senior Engineer modes;
-- give escalating but useful support after repeated mistakes;
-- speak dialogue using browser voice when enabled.
-
-## Disturbance system
-
-The dungeon may interrupt with compact contextual events: Python police, senior-engineer calls, code-review alerts, traceback funerals, meme transmissions, variable riots, brain-cell alerts and snake fact checks. These exist to keep the classroom alive, not to distract the learner. They must be dismissible, brief and semantically tied to learning.
-
-## Adaptive re-teaching
-
-After a diagnostic or failure, the teacher can change strategy:
-- simple explanation;
-- real-life analogy;
-- visual flow;
-- code walkthrough;
-- interactive practice.
-
-The teacher asks what the learner does not understand instead of dumping the same explanation repeatedly.
-
-## Progressive mastery gauntlet
-
-Each lesson has a 20-step challenge opportunity ladder spanning recognition, prediction, implementation, trace/debug, variation, edge cases, transfer, interview reasoning, production thinking and final proof. The runtime challenge is the real judge; one lucky execution never represents complete mastery.
-
-Repeated failures trigger remediation and lower-complexity practice. Strong success may increase difficulty.
-
-## Information hierarchy
-
-**Primary:** teacher instruction and current mission.
-
-**Secondary:** one hint, mastery state, runtime result, contextual reaction, conversation.
-
-**Tertiary:** settings, implementation metadata and advanced system details.
-
-Tertiary information must never compete with the lesson's next action.
+Avoid:
+- generic cyberpunk polygons
+- rotating octagons
+- fake telemetry
+- excessive neon
+- random particle storms
+- dense dashboard widgets
+- floating glass-card collections
 
 ## Motion rules
 
-Use Motion for React for meaningful scene/stage transitions, teacher reactions, portal entry, ground shake, chat arrival and success/failure acknowledgement. Prefer transform/opacity/layout transitions. Every non-essential animation must respect reduced-motion preferences.
+Motion has narrative meaning: camera cuts, wake-up reveal, impact, Pythosura emergence, jaw opening, portal activation, character reactions, stage changes, success/failure acknowledgement and descent transitions.
 
-## Sound and voice
+Never animate something merely because animation is available. Respect reduced motion everywhere.
 
-Sound is part of the story when enabled: subtle rumble, portal/impact cues and lesson feedback. Browser speech is additive for Pythonsura dialogue. The experience must remain fully understandable with sound or voice disabled.
+## Information hierarchy
+
+**Primary:** what is happening and what must I do next?
+
+**Secondary:** why it works, tutor explanation, mastery, one hint.
+
+**Tertiary:** settings, metadata and implementation details.
+
+Tertiary information must never compete with the lesson action.
+
+## Responsive behavior
+
+Desktop is a cinematic classroom. Tablet keeps the character and mission dominant. Mobile becomes a vertical cinematic → teacher → mission → editor → conversation sequence.
 
 ## Accessibility
 
-Keyboard navigation, visible focus, strong contrast, semantic controls, readable typography, live tutor/runtime feedback, reduced motion and responsive layouts are mandatory.
+Maintain keyboard operation, visible focus, readable contrast, semantic controls, live feedback, reduced motion and a fully usable no-audio path. Voice and sound should enrich the experience, never gate comprehension.
 
 ## Design provenance
 
-The methodology was informed by the public UI/UX Pro Max skill by NextLevelBuilder. This design system is a product-specific implementation and does not copy external assets.
+The public UI/UX Pro Max skill by NextLevelBuilder is used as design research for hierarchy, design-system thinking and pre-delivery review. This file defines Python From Hell's own art direction and interaction system rather than copying external assets.
