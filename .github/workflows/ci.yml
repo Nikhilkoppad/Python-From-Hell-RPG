@@ -1,4 +1,5 @@
 name: Python From Hell CI — release gate
+# Runs against the formatter-normalized source committed on main.
 
 on:
   push:
