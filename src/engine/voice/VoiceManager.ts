@@ -40,22 +40,18 @@ private masterVolume = 0.9;
 setEnabled(enabled: boolean) {
 this.enabled = enabled;
 
-```
 if (!enabled) {
   this.stop();
 }
-```
 
 }
 
 setVolume(volume: number) {
 this.masterVolume = Math.max(0, Math.min(1, volume));
 
-```
 if (this.current) {
   this.current.volume = this.masterVolume;
 }
-```
 
 }
 
@@ -66,11 +62,9 @@ return this.enabled;
 stop() {
 if (!this.current) return;
 
-```
 this.current.pause();
 this.current.currentTime = 0;
 this.current = undefined;
-```
 
 }
 
@@ -79,7 +73,6 @@ if (!this.enabled || typeof window === 'undefined') {
 return false;
 }
 
-```
 this.stop();
 
 const path = this.getPath(line);
@@ -122,14 +115,12 @@ try {
 
   return false;
 }
-```
 
 }
 
 preload(line: VoiceLine) {
 if (typeof window === 'undefined') return;
 
-```
 const path = this.getPath(line);
 
 if (this.cache.has(path)) return;
@@ -138,7 +129,6 @@ const audio = new Audio(path);
 audio.preload = 'auto';
 
 this.cache.set(path, audio);
-```
 
 }
 
