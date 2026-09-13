@@ -1,4 +1,4 @@
-name: Python From Hell CI
+name: Python From Hell CI — release gate
 
 on:
   push:
