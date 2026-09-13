@@ -22,15 +22,9 @@ class VoiceManager {
   private masterVolume = 0.9;
 
   /**
-
-* Voice files will eventually live under:
-*
-* public/audio/voice/
-*
-* Example:
-* public/audio/voice/en/pythosura/arrival_01.mp3
-* public/audio/voice/hinglish/pythosura/arrival_01.mp3
-  */
+   * Voice files live under public/audio/voice/.
+   * Example: public/audio/voice/en/pythosura/arrival_01.mp3
+   */
   private getPath(line: VoiceLine): string {
     return `/audio/voice/${line.language}/${line.actor}/${line.id}.mp3`;
   }
@@ -71,28 +65,20 @@ class VoiceManager {
     this.stop();
 
     const path = this.getPath(line);
-
     let audio = this.cache.get(path);
 
     if (!audio) {
       audio = new Audio(path);
       audio.preload = 'auto';
-
-      audio.addEventListener(
-        'ended',
-        () => {
-          if (this.current === audio) {
-            this.current = undefined;
-          }
-        },
-        { once: false },
-      );
-
+      audio.addEventListener('ended', () => {
+        if (this.current === audio) {
+          this.current = undefined;
+        }
+      });
       this.cache.set(path, audio);
     }
 
     audio.volume = Math.max(0, Math.min(1, this.masterVolume * (line.volume ?? 1)));
-
     this.current = audio;
 
     try {
@@ -109,6 +95,62 @@ class VoiceManager {
     }
   }
 
+  /**
+   * Plays one line and resolves only after the clip ends. This is used by
+   * cinematic dialogue where the next character must wait for the previous one.
+   */
+  async playAndWait(line: VoiceLine): Promise<boolean> {
+    if (!this.enabled || typeof window === 'undefined') {
+      return false;
+    }
+
+    const path = this.getPath(line);
+    let audio = this.cache.get(path);
+
+    if (!audio) {
+      audio = new Audio(path);
+      audio.preload = 'auto';
+      this.cache.set(path, audio);
+    }
+
+    this.stop();
+    audio.volume = Math.max(0, Math.min(1, this.masterVolume * (line.volume ?? 1)));
+    this.current = audio;
+
+    return new Promise<boolean>((resolve) => {
+      let settled = false;
+      const finish = (played: boolean) => {
+        if (settled) return;
+        settled = true;
+        audio!.removeEventListener('ended', onEnded);
+        audio!.removeEventListener('error', onError);
+        if (this.current === audio) {
+          this.current = undefined;
+        }
+        resolve(played);
+      };
+      const onEnded = () => finish(true);
+      const onError = () => finish(false);
+
+      audio!.addEventListener('ended', onEnded, { once: true });
+      audio!.addEventListener('error', onError, { once: true });
+
+      void audio!.play().catch((error) => {
+        console.warn(`[VoiceManager] Could not play voice "${line.id}"`, error);
+        finish(false);
+      });
+    });
+  }
+
+  async playSequence(lines: VoiceLine[]): Promise<boolean> {
+    for (const line of lines) {
+      if (!this.enabled) return false;
+      const played = await this.playAndWait(line);
+      if (!played) return false;
+    }
+    return lines.length > 0;
+  }
+
   preload(line: VoiceLine) {
     if (typeof window === 'undefined') return;
 
@@ -118,7 +160,6 @@ class VoiceManager {
 
     const audio = new Audio(path);
     audio.preload = 'auto';
-
     this.cache.set(path, audio);
   }
 
@@ -127,14 +168,6 @@ class VoiceManager {
     this.cache.clear();
   }
 
-  /**
-
-* Temporary compatibility helper.
-*
-* This intentionally does NOT use browser speech synthesis.
-* It gives us one central place to migrate existing dialogue
-* while the real voice assets are being created.
-  */
   async speak(line: VoiceLine): Promise<boolean> {
     return this.play(line);
   }
@@ -142,10 +175,6 @@ class VoiceManager {
 
 export const voiceManager = new VoiceManager();
 
-/**
-
-* Small helper for scripted dialogue.
-  */
 export function voiceLine(
   id: string,
   text: string,
@@ -166,11 +195,6 @@ export function voiceLine(
   };
 }
 
-/**
-
-* Keeps the voice system independent from the existing SFX system.
-* Voice is dialogue; hellAudio remains ambience/impact/roar/etc.
-  */
 export function stopVoice() {
   voiceManager.stop();
 }
