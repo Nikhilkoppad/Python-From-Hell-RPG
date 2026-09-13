@@ -173,6 +173,35 @@ function createEnvironment(scene: THREE.Scene) {
   embers(scene);
 }
 
+function embers(scene: THREE.Scene) {
+  const count = 280;
+  const positions = new Float32Array(count * 3);
+
+  for (let i = 0; i < count; i += 1) {
+    positions[i * 3] = (Math.random() - 0.5) * 28;
+    positions[i * 3 + 1] = Math.random() * 8;
+    positions[i * 3 + 2] = -Math.random() * 34;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(positions, 3),
+  );
+
+  const points = new THREE.Points(
+    geometry,
+    new THREE.PointsMaterial({
+      color: 0xff693b,
+      size: 0.045,
+      transparent: true,
+      opacity: 0.85,
+    }),
+  );
+
+  scene.add(points);
+}
+
 function disposeScene(scene: THREE.Scene) {
   scene.traverse((object) => {
     if (object instanceof THREE.Mesh) {
