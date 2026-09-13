@@ -1,6 +1,6 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useMemo,useRef,useState} from 'react';
 import {AnimatePresence,motion,useReducedMotion} from 'motion/react';
-import {Brain,ChevronRight,MessageCircle,Volume2,VolumeX,Zap,BookOpen,Flame} from 'lucide-react';
+import {Brain,ChevronLeft,ChevronRight,MessageCircle,Mic,MicOff,Play,Send,Sparkles,Zap} from 'lucide-react';
 import type {Lesson} from '../domain/lessons';
 import type {AttemptStats,RoastIntensity} from '../types/progress';
 import {askMentor,createOllamaProvider,type MentorMode,MentorChatTurn} from '../ai/mentor';
@@ -9,37 +9,169 @@ import {playSfx} from '../engine/audio';
 type Stage='story'|'assess'|'teach'|'try'|'retry'|'mastered';
 type Props={lesson:Lesson;stats?:AttemptStats;output:string;message:string;userCode:string;sound:boolean;roastIntensity:RoastIntensity;completed:boolean;onHintUsed:()=>void;onAdvance:()=>void};
 type Chat={role:'user'|'assistant';text:string};
-const STORY:Record<number,string>={1:'You wake inside the CPython Execution Crater. Broken scripts crawl through the smoke. PYTHONSURA drops beside you: “You want Python? Fine. I will teach you before the interpreter eats you.”',2:'The floor splits into branching paths. PYTHONSURA points at the maze: “Python is not reading your mind. You tell it what happens next.”',3:'A corridor repeats forever. PYTHONSURA sighs: “Someone forgot the exit condition. Congratulations. You found production.”',4:'Cursed containers rise from the dark. “Stop stabbing data structures at random,” PYTHONSURA says. “Learn which beast fits the job.”',5:'You enter the Function Forge. “Write it once. Call it ten times. Stop copy-pasting your own damn bug,” PYTHONSURA grins.',6:'The Object Crypt opens. “State plus behavior. No magic. Learn the mechanism.”',7:'Tracebacks cover the floor. “Errors are evidence. Read the damn evidence,” PYTHONSURA says.',8:'You descend into Runtime Hell. “Separate Python the language from CPython the machine.”',9:'Timelines collide. Threads race through one doorway. “Timing bugs do not care how confident you are.”',10:'Objects leave reference trails in the dark. “Learn who keeps them alive.”',11:'Opcodes and frames surround you. “Version labels or get wrecked by reality.”',12:'The Core opens. “You are not here to memorize Python anymore. You are here to command it.”'};
+type Disturbance={emoji:string;title:string;text:string};
+
+const STORY:Record<number,string>={
+  1:'You wake inside the CPython Execution Crater. Broken scripts crawl through the smoke. PYTHONSURA drops from the ceiling like an angry production incident: “You want Python? Fine. I will teach you before the interpreter eats you.”',
+  2:'The floor splits into branching paths. PYTHONSURA draws a glowing decision tree in the air: “Python is not reading your mind. You tell it what happens next.”',
+  3:'A corridor repeats forever. PYTHONSURA stares at you, then at the loop: “Someone forgot the exit condition. Congratulations. You found production.”',
+  4:'Cursed containers rise from the dark. “Stop stabbing data structures at random,” PYTHONSURA says. “Learn which beast fits the job.”',
+  5:'You enter the Function Forge. “Write it once. Call it ten times. Stop copy-pasting your own damn bug,” PYTHONSURA grins.',
+  6:'The Object Crypt opens. “State plus behavior. No magic. Learn the mechanism, then make it obey you.”',
+  7:'Tracebacks cover the floor. “Errors are evidence. Read the damn evidence,” PYTHONSURA says, kicking a traceback toward you.',
+  8:'You descend into Runtime Hell. “Separate Python the language from CPython the machine. They are cousins, not twins.”',
+  9:'Timelines collide. Threads race through one doorway. “Timing bugs do not care how confident you are.”',
+  10:'Objects leave reference trails in the dark. “Learn who keeps them alive. Memory does not forgive vibes.”',
+  11:'Opcodes and frames surround you. “Version labels or get wrecked by reality,” PYTHONSURA says.',
+  12:'The Core opens. “You are not here to memorize Python anymore. You are here to command it.”',
+};
+
+const DISTURBANCES:Disturbance[]=[
+  {emoji:'🚨',title:'PYTHON INTERRUPT',text:'Your code has been intercepted by the Department of Suspicious Indentation.'},
+  {emoji:'📡',title:'MEME DROP',text:'Breaking news: a developer just said “it works on my machine.” The machine is now on trial.'},
+  {emoji:'🧨',title:'VARIABLE ESCAPED',text:'A variable has left its assigned scope. PYTHONSURA is hunting it with a debugger.'},
+  {emoji:'📞',title:'SENIOR ENGINEER CALL',text:'Explain the next line without saying “it just works.” You have 10 seconds. Good luck, soldier.'},
+  {emoji:'🪦',title:'TRACEBACK GRAVE',text:'Something died. Do not guess. Read the last useful line of the traceback.'},
+  {emoji:'🤡',title:'CODE REVIEW ALERT',text:'Someone reviewed your code and replied: “Interesting.” This is not a compliment.'},
+  {emoji:'🧠',title:'BRAIN CELL REPORT',text:'Two neurons have connected. Do not scare them. Keep the concept tiny.'},
+  {emoji:'🔥',title:'HELL WEATHER',text:'The runtime temperature is emotionally unsafe. Your job remains: write one correct line.'},
+];
+
+const QUICK_PROMPTS=['Explain like I am five.','Why does this work?','Roast my code.','Give me one tiny hint.'];
 const DISTRACTORS=['It changes CPU temperature.','It always mutates the original object.','It is guaranteed by every Python implementation.'];
-const choices=(l:Lesson)=>[l.explanation.split('. ')[0],DISTRACTORS[(l.layer+l.title.length)%3],'It is only visual formatting.','It never changes program behavior.'];
-const tip=(l:Lesson)=>{const t=l.topic.toLowerCase();if(/print/.test(t))return 'Think value → output. You hand Python a thing; Python hands the screen a result.';if(/variable|assignment|binding/.test(t))return 'Think name → object. The name is a label, not a tiny storage box.';if(/loop|range|iteration/.test(t))return 'Think start → repeat → update → stop. A loop without an exit is a production incident wearing a hoodie.';if(/list|tuple|set|dict|collection|slice/.test(t))return 'Pick the container first. Then choose the operation that actually matches the job.';if(/function|parameter|argument|scope|decorator|generator|closure/.test(t))return 'Think input → behavior → output. Keep the spell small enough that you can explain every line.';if(/exception|error|finally|try/.test(t))return 'Think failure → evidence → recovery. The traceback is not your enemy; it is the snitch.';if(/class|object|inherit|mro|descriptor/.test(t))return 'Think state + behavior + attribute lookup. Objects are mechanisms, not decorative boxes.';if(/async|thread|process|lock|race|concurrency/.test(t))return 'Think who runs when and what state is shared. Timing bugs do not care about confidence.';if(/memory|gc|refcount|bytecode|cpython|jit|runtime/.test(t))return 'Think language guarantee first, CPython implementation detail second. Version labels save careers.';return `Predict what ${l.topic} does before typing.`};
-const conceptRail=(l:Lesson)=>{const t=l.topic.toLowerCase();if(/print/.test(t))return ['VALUE','CALL','OUTPUT'];if(/variable|assignment|binding/.test(t))return ['NAME','OBJECT','USE'];if(/if|comparison|logical/.test(t))return ['FACT','DECISION','PATH'];if(/loop|range|iteration|break|continue/.test(t))return ['ITERABLE','REPEAT','STOP'];if(/list|tuple|set|dict|slice/.test(t))return ['DATA','OPERATION','RESULT'];if(/function|parameter|argument|return|scope|recursion|lambda/.test(t))return ['INPUT','BODY','OUTPUT'];if(/class|object|inherit|polymorphism|encapsulation/.test(t))return ['STATE','BEHAVIOR','LOOKUP'];if(/exception|error|raise|finally/.test(t))return ['FAIL','TRACE','RECOVER'];if(/async|thread|process|lock|race/.test(t))return ['ACTOR','TIME','STATE'];if(/memory|gc|refcount/.test(t))return ['REFERENCE','LIFETIME','COLLECT'];if(/bytecode|frame|cpython|jit|runtime/.test(t))return ['SOURCE','MACHINE','EXECUTION'];return ['IDEA','CODE','BEHAVIOR']};
-function roast(line:string,intensity:RoastIntensity){if(intensity==='MILD')return `PYTHONSURA: ${line}`;if(intensity==='SAVAGE')return `PYTHONSURA: ${line} One mistake is survivable. Repeating it without reading the error is a lifestyle choice.`;return `PYTHONSURA: ${line} Your traceback has developed a personal grudge. Read it before touching another damn line.`}
-const steps:Stage[]=['story','assess','teach','try','retry','mastered'];
+
+function roast(line:string,intensity:RoastIntensity){
+  if(intensity==='MILD')return `PYTHONSURA: ${line}`;
+  if(intensity==='SAVAGE')return `PYTHONSURA: ${line} One mistake is survivable. Repeating it without reading the error is a lifestyle choice.`;
+  return `PYTHONSURA: ${line} Your traceback has developed a personal grudge. Read it before touching another damn line.`;
+}
+
+function lessonTip(lesson:Lesson){
+  const topic=lesson.topic.toLowerCase();
+  if(/print/.test(topic))return 'Think value → call → output. Give Python a thing, then watch what comes back.';
+  if(/variable|assignment|binding/.test(topic))return 'Think name → object. A variable is a label pointing at an object, not a tiny storage box.';
+  if(/if|comparison|logical/.test(topic))return 'Think fact → decision → path. First decide what is true; then let Python choose the branch.';
+  if(/loop|range|iteration|break|continue/.test(topic))return 'Think start → repeat → update → stop. A loop without an exit is just a production incident with better punctuation.';
+  if(/list|tuple|set|dict|collection|slice/.test(topic))return 'Pick the data structure first. Then choose the operation that matches the job instead of stabbing at it randomly.';
+  if(/function|parameter|argument|return|scope|recursion|lambda|decorator|generator/.test(topic))return 'Think input → behavior → output. Keep the spell small enough that you can explain every line out loud.';
+  if(/exception|error|raise|finally|try/.test(topic))return 'Think failure → evidence → recovery. The traceback is the snitch. Listen to the snitch.';
+  if(/class|object|inherit|polymorphism|encapsulation|descriptor|mro/.test(topic))return 'Think state + behavior + lookup. Objects are mechanisms, not decorative boxes.';
+  if(/async|thread|process|lock|race|concurrency|task/.test(topic))return 'Think who runs when and what state is shared. Timing bugs do not care about confidence.';
+  if(/memory|gc|refcount|bytecode|cpython|jit|runtime/.test(topic))return 'Think language guarantee first, CPython implementation detail second. Version labels save careers.';
+  return `Predict what ${lesson.topic} does before typing.`;
+}
+
+function teacherBites(lesson:Lesson){
+  return [
+    {label:'THE IDEA',title:lesson.topic,body:lesson.explanation,action:'NEXT — SHOW ME'},
+    {label:'WATCH ONE',title:'PYTHONSURA DEMONSTRATES',body:`${lessonTip(lesson)} Watch the tiny spell, then close your eyes and tell me what each line is doing.`,action:'I CAN EXPLAIN IT'},
+    {label:'YOUR TURN',title:'ONE SMALL MISSION',body:`Write the smallest code that proves you understand ${lesson.topic}. I will run it, judge it, roast it, and teach the part you missed.`,action:'ENTER THE ARENA'},
+  ];
+}
+
+function speak(text:string,enabled:boolean){
+  if(!enabled||typeof window==='undefined'||!('speechSynthesis' in window))return;
+  window.speechSynthesis.cancel();
+  const utterance=new SpeechSynthesisUtterance(text.replace(/[`*_#]/g,''));
+  utterance.rate=.96;utterance.pitch=1.02;utterance.volume=.9;
+  window.speechSynthesis.speak(utterance);
+}
+
 export function TutorGuide({lesson,stats,output,message,userCode,sound,roastIntensity,completed,onHintUsed,onAdvance}:Props){
- const[stage,setStage]=useState<Stage>('story');const[answer,setAnswer]=useState<number|null>(null);const[input,setInput]=useState('');const[chats,setChats]=useState<Chat[]>([]);const[asking,setAsking]=useState(false);const[mode,setMode]=useState<MentorMode>('teacher');const[hintIndex,setHintIndex]=useState(-1);const reducedMotion=useReducedMotion();
- const mastery=Math.round(stats?.mastery??0);const attempts=stats?.attempts??0;const successes=stats?.successes??0;const opts=useMemo(()=>choices(lesson),[lesson]);const rail=useMemo(()=>conceptRail(lesson),[lesson]);const currentHint=hintIndex>=0?lesson.hints[hintIndex]:'';
- const meme=completed||stage==='mastered'?'🧠🔥 BRAIN CELLS: DANGEROUS':attempts===0?'🧠 2 BRAIN CELLS ONLINE':stats?.lastOutcome==='runtime-error'?'💀 TRACEBACK GOT YOUR ASS':stats?.lastOutcome==='failure'?'🤡 YOU WROTE THAT ON PURPOSE?':'🫠 PYTHON IS JUDGING YOU';
- useEffect(()=>{setStage('story');setAnswer(null);setInput('');setChats([]);setHintIndex(-1)},[lesson.id]);
- useEffect(()=>{if(completed)setStage('mastered');else if(stats?.lastOutcome)setStage('retry')},[completed,stats?.lastOutcome]);
- const ask=async()=>{const text=input.trim();if(!text||asking)return;setAsking(true);setChats(c=>[...c,{role:'user',text}]);setInput('');const history:MentorChatTurn[]=chats.map(c=>({role:c.role,content:c.text}));const reply=await askMentor({mode,lessonTitle:lesson.title,topic:lesson.topic,userCode,output:`${output}\n${message}\nLearner: ${text}`,mastery,recentMistakes:stats?.lastOutcome&&stats.lastOutcome!=='success'?[stats.lastOutcome]:[],chatHistory:history},createOllamaProvider());setChats(c=>[...c,{role:'assistant',text:reply.text}]);setAsking(false)};
- const pick=(i:number)=>{setAnswer(i);if(i===0){setStage('teach');if(sound)playSfx('success')}else if(sound)playSfx('fail')};
- const go=(next:Stage)=>{setStage(next);if(sound&&next==='teach')playSfx('enter')};
- const revealHint=()=>{if(!lesson.hints.length||hintIndex>=lesson.hints.length-1)return;setHintIndex(current=>current+1);onHintUsed();if(sound)playSfx('enter')};
- const anim=(from:any,to:any)=>reducedMotion?{initial:false,animate:to}:{initial:from,animate:to};
- return <section className={`tutor-shell tutor-${stage}`} aria-label="PYTHONSURA tutor">
-  <div className="tutor-topline"><div className="tutor-identity"><motion.div className="tutor-orb" {...anim({scale:.82,opacity:0},{scale:1,opacity:1})} transition={{type:'spring',stiffness:320,damping:18}}><Brain size={21}/><i/></motion.div><div><small>PYTHONSURA // JARVIS MODE</small><strong>YOUR PYTHON TUTOR</strong></div></div><div className="tutor-status"><span/> <b>LOCAL AI // GEMMA 4</b><em>{meme}</em></div></div>
-  <div className="lesson-ritual"><div className="ritual-rail"><span>DESCENT {String(lesson.layer).padStart(2,'0')}</span><div>{steps.slice(0,-1).map(s=><motion.i key={s} animate={{scaleX:steps.indexOf(s)<=steps.indexOf(stage)?1:.28,opacity:steps.indexOf(s)<=steps.indexOf(stage)?1:.3}} transition={{duration:reducedMotion?0:.35}}/> )}</div><span>{attempts?`ATTEMPT ${attempts+1}`:'FIRST RUN'}</span></div></div>
-  <div className="tutor-story"><div className="story-copy"><small>ADVENTURE LOG // LAYER {String(lesson.layer).padStart(2,'0')}</small><AnimatePresence mode="wait"><motion.div key={stage} {...anim({opacity:0,y:12,filter:'blur(5px)'},{opacity:1,y:0,filter:'blur(0px)'})} exit={reducedMotion?undefined:{opacity:0,y:-8,filter:'blur(4px)'}} transition={{duration:reducedMotion?0:.28}}><h2>{stage==='story'?'THE CRATER WAKES':stage==='assess'?'FIRST, I CHECK YOUR BRAIN':stage==='teach'?'GOOD. NOW I TEACH':stage==='try'?'YOUR TURN, HERETIC':stage==='retry'?'NOPE. WE ARE NOT DONE YET':'CONCEPT MASTERED'}</h2><p>{stage==='story'?STORY[lesson.layer]:stage==='assess'?'One tiny prediction. No pressure. I need to see how you think before I teach.':stage==='teach'?lesson.explanation:stage==='try'?`Mission: ${tip(lesson)}`:stage==='retry'?`${roast(lesson.roast,roastIntensity)} ${message||'Change one thing. Run again. I am not handing you the damn answer.'}`:'You proved the behavior repeatedly. The concept is now part of your reflexes.'}</p></motion.div></AnimatePresence></div><motion.div className="meme-sticker" animate={reducedMotion?undefined:{y:[0,-5,0],rotate:[-2,1,-2]}} transition={{duration:3.6,repeat:Infinity,ease:'easeInOut'}}>{meme}</motion.div></div>
-  <div className="concept-loom" aria-label={`Concept map for ${lesson.topic}`}><div className="loom-title"><BookOpen size={13}/> CONCEPT LOOM</div><div className="loom-track">{rail.map((item,index)=><motion.div key={item} className={`loom-node node-${index}`} {...anim({opacity:0,y:10},{opacity:1,y:0})} transition={{delay:reducedMotion?0:.08*index}}><span>{String(index+1).padStart(2,'0')}</span><b>{item}</b>{index<rail.length-1&&<motion.i initial={{scaleX:0}} animate={{scaleX:1}} transition={{delay:reducedMotion?0:.18+.08*index,duration:reducedMotion?0:.35}}/>}</motion.div>)}</div></div>
-  <AnimatePresence mode="wait">
-   {stage==='story'&&<motion.div key="story" className="tutor-actions" {...anim({opacity:0,y:10},{opacity:1,y:0})}><button className="tutor-primary" onClick={()=>go('assess')}>BEGIN DIAGNOSTIC <ChevronRight size={16}/></button></motion.div>}
-   {stage==='assess'&&<motion.div key="assess" className="assessment-card" {...anim({opacity:0,y:10},{opacity:1,y:0})}><small>1 QUESTION // ZERO PRESSURE</small><strong>What is the key idea behind <em>{lesson.topic}</em>?</strong>{opts.map((o,i)=><motion.button key={o} whileHover={reducedMotion?undefined:{x:3}} whileTap={reducedMotion?undefined:{scale:.99}} onClick={()=>pick(i)} className={`assessment-option ${answer===i?(i===0?'correct':'wrong'):''}`}>{String.fromCharCode(65+i)} <span>{o}</span></motion.button>)}</motion.div>}
-   {stage==='teach'&&<motion.div key="teach" className="teach-grid" {...anim({opacity:0,y:10},{opacity:1,y:0})}><div><small>1 // MEANS</small><strong>{lesson.topic}</strong><p>{lesson.explanation}</p></div><div><small>2 // THINK LIKE PYTHONSURA</small><p>{tip(lesson)}</p></div><div><small>3 // TINY SPELL</small><pre>{lesson.starterCode}</pre></div><div className="teach-controls"><button className="tutor-primary" onClick={()=>go('try')}>I GET IT — LET ME CODE <Zap size={15}/></button><span>One concept. One tiny spell. No answer dumping.</span></div></motion.div>}
-   {stage==='retry'&&<motion.div key="retry" className="retry-card" {...anim({opacity:0,y:10},{opacity:1,y:0})}><div><small>MASTERY</small><strong>{mastery}%</strong><i><b style={{width:`${mastery}%`}}/></i></div><p>Attempts: {attempts} · Clean successes: {successes}. We are hunting understanding, not lucky output.</p><button className="tutor-primary" onClick={()=>go('try')}>TRY AGAIN <ChevronRight size={15}/></button></motion.div>}
-   {stage==='try'&&<motion.div key="try" className="mission-callout" {...anim({opacity:0,y:10,scale:.99},{opacity:1,y:0,scale:1})}><div><small>LIVE MISSION</small><strong>{lesson.title}</strong><p>Write it. Run it. Read the error. Explain what happened. Then prove it again.</p>{currentHint&&<motion.div className="coach-nudge" {...anim({opacity:0,y:5},{opacity:1,y:0})}><span>NUDGE {hintIndex+1}/{lesson.hints.length}</span><b>{currentHint}</b></motion.div>}</div><div className="mission-actions"><span>{mastery}% MASTERY</span><button className="nudge-button" onClick={revealHint} disabled={!lesson.hints.length||hintIndex>=lesson.hints.length-1}>NEED A NUDGE?</button></div></motion.div>}
-   {stage==='mastered'&&<motion.div key="mastered" className="mastered-card" {...anim({opacity:0,y:12,scale:.98},{opacity:1,y:0,scale:1})}><div className="mastery-seal"><Flame size={19}/></div><div><small>LEVEL GATE CLEARED</small><strong>CONCEPT LOCKED IN</strong><p>Three successful behavioral proofs. The next lesson is earned, not clicked.</p></div><motion.button className="tutor-primary" whileHover={reducedMotion?undefined:{x:4}} whileTap={reducedMotion?undefined:{scale:.98}} onClick={onAdvance}>CONTINUE DESCENT <ChevronRight size={16}/></motion.button></motion.div>}
-  </AnimatePresence>
-  <div className="tutor-chat"><div className="chat-head"><span><MessageCircle size={14}/> TALK TO ME ANYTIME</span><div>{(['teacher','comedy','battle','senior-engineer'] as MentorMode[]).map(m=><motion.button key={m} whileTap={reducedMotion?undefined:{scale:.96}} className={mode===m?'active':''} onClick={()=>setMode(m)}>{m.replace('-',' ')}</motion.button>)}</div></div><div className="chat-log" aria-live="polite">{chats.length===0&&<p>Talk normally: “why?”, “what does this mean?”, “roast me”, “explain like I’m five”, or swear at the code.</p>}{chats.map((c,i)=><motion.div key={`${c.role}-${i}`} {...anim({opacity:0,y:7},{opacity:1,y:0})} className={`chat-msg ${c.role}`}><b>{c.role==='user'?'YOU':'PYTHONSURA'}</b><p>{c.text}</p></motion.div>)}</div><div className="chat-input"><input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();void ask()}}} placeholder="Talk to PYTHONSURA…"/><button onClick={()=>void ask()} disabled={asking||!input.trim()}>{asking?'THINKING…':'SEND'}</button></div><div className="chat-foot">{sound?<Volume2 size={12}/>:<VolumeX size={12}/>} {sound?'SOUND ON':'SOUND OFF'} · {mastery>=82?'Mastery gate armed':'Tutor is watching your attempts'}</div></div>
- </section>
+  const reduced=useReducedMotion();
+  const [stage,setStage]=useState<Stage>('story');
+  const [answer,setAnswer]=useState<number|null>(null);
+  const [teachStep,setTeachStep]=useState(0);
+  const [input,setInput]=useState('');
+  const [chats,setChats]=useState<Chat[]>([]);
+  const [asking,setAsking]=useState(false);
+  const [mode,setMode]=useState<MentorMode>('teacher');
+  const [voice,setVoice]=useState(true);
+  const [disturbance,setDisturbance]=useState(0);
+  const lastMessage=useRef(message);
+  const bites=useMemo(()=>teacherBites(lesson),[lesson]);
+  const mastery=Math.round(stats?.mastery??0);
+  const attempts=stats?.attempts??0;
+  const successes=stats?.successes??0;
+  const current=DISTURBANCES[disturbance%DISTURBANCES.length];
+  const optionSet=useMemo(()=>[lesson.explanation.split('. ')[0],DISTRACTORS[(lesson.layer+lesson.title.length)%DISTRACTORS.length],'It is only visual formatting.','It never changes program behavior.'],[lesson]);
+  const meme=completed||stage==='mastered'?'🧠🔥 BRAIN CELLS: DANGEROUS':attempts===0?'🧠 2 BRAIN CELLS ONLINE':stats?.lastOutcome==='runtime-error'?'💀 TRACEBACK GOT YOUR ASS':stats?.lastOutcome==='failure'?'🤡 YOU WROTE THAT ON PURPOSE?':'🫠 PYTHON IS JUDGING YOU';
+
+  useEffect(()=>{setStage('story');setAnswer(null);setTeachStep(0);setInput('');setChats([]);setDisturbance(0);lastMessage.current=''},[lesson.id]);
+  useEffect(()=>{if(completed)setStage('mastered');else if(stats?.lastOutcome)setStage('retry')},[completed,stats?.lastOutcome]);
+  useEffect(()=>{const timer=window.setInterval(()=>setDisturbance(v=>v+1),7200);return()=>window.clearInterval(timer)},[]);
+  useEffect(()=>{
+    if(message&&message!==lastMessage.current){
+      lastMessage.current=message;
+      if(!completed)speak(stats?.lastOutcome==='success'?'Good. That run was correct, but I need you to prove you understand it.':roast(message,roastIntensity),voice);
+    }
+  },[message,completed,roastIntensity,stats?.lastOutcome,voice]);
+
+  const transition=(next:Stage)=>{setStage(next);if(sound)playSfx(next==='mastered'?'success':next==='teach'?'enter':'enter');const lines:Record<Stage,string>={story:'Welcome to the crater.',assess:'Before I teach you, I need to see how you think.',teach:bites[teachStep]?.body??'',try:'Your turn. One tiny spell. No copying.',retry:'Nope. We are not leaving until your brain understands this.',mastered:'Excellent. That concept is now installed.',};speak(lines[next],voice);};
+
+  const pick=(i:number)=>{setAnswer(i);if(i===0){setTeachStep(0);transition('teach')}else{if(sound)playSfx('fail');setStage('assess');speak(roast('Nope. That is not the idea. But good — now I know what to teach you.',roastIntensity),voice)}};
+
+  const ask=async(textOverride?:string)=>{
+    const text=(textOverride??input).trim();if(!text||asking)return;
+    setAsking(true);setChats(c=>[...c,{role:'user',text}]);setInput('');
+    const history:MentorChatTurn[]=chats.map(c=>({role:c.role,content:c.text}));
+    const reply=await askMentor({mode,lessonTitle:lesson.title,topic:lesson.topic,userCode,output:`${output}\n${message}\nLearner: ${text}`,mastery,recentMistakes:stats?.lastOutcome&&stats.lastOutcome!=='success'?[stats.lastOutcome]:[],chatHistory:history},createOllamaProvider('/ollama/api','gemma4:latest'));
+    setChats(c=>[...c,{role:'assistant',text:reply.text}]);
+    setAsking(false);speak(reply.text,voice);
+  };
+
+  const quickAsk=(prompt:string)=>{void ask(prompt)};
+  const revealHint=()=>{if(!lesson.hints.length)return;onHintUsed();const nextIndex=Math.min((stats?.hintsUsed??0),lesson.hints.length-1);setChats(c=>[...c,{role:'assistant',text:`NUDGE: ${lesson.hints[nextIndex]}`}]);speak(`Tiny hint: ${lesson.hints[nextIndex]}`,voice)};
+  const teachNext=()=>{if(teachStep<bites.length-1){const next=teachStep+1;setTeachStep(next);if(sound)playSfx('enter');speak(bites[next].body,voice)}else transition('try')};
+
+  return <section className="tutor-shell" aria-label="PYTHONSURA living tutor">
+    <div className="tutor-scanline" aria-hidden="true"/>
+    <div className="tutor-header">
+      <div className="tutor-avatar-wrap">
+        <motion.div className="tutor-avatar" animate={reduced?undefined:{boxShadow:['0 0 18px #ff5c3930','0 0 44px #ff5c3960','0 0 18px #ff5c3930']}} transition={{duration:2.8,repeat:Infinity}}>
+          <Brain size={23}/><span className="avatar-eye eye-one"/><span className="avatar-eye eye-two"/>
+        </motion.div>
+        <div><small>PYTHONSURA // LIVE TEACHER</small><strong>JARVIS FOR PYTHON</strong></div>
+      </div>
+      <div className="tutor-controls"><span className="ai-live"><i/> GEMMA 4 // LOCAL</span><button onClick={()=>setVoice(v=>!v)} title={voice?'Mute tutor voice':'Enable tutor voice'}>{voice?<Mic size={13}/>:<MicOff size={13}/>} {voice?'VOICE':'MUTED'}</button></div>
+    </div>
+
+    <div className="tutor-stagebar"><span>LESSON {lesson.title.toUpperCase()}</span><div>{['STORY','CHECK','TEACH','TRY','MASTER'].map(label=><b key={label} className={['story','assess','teach','try','retry','mastered'].indexOf(stage)>=['STORY','CHECK','TEACH','TRY','TRY','MASTER'].indexOf(label)?'lit':''}>{label}</b>)}</div><span>{attempts?`ATTEMPT ${attempts+1}`:'FIRST RUN'}</span></div>
+
+    <div className="tutor-theatre">
+      <div className="teacher-scene">
+        <AnimatePresence mode="wait">
+          <motion.div key={`${stage}-${teachStep}`} className="teacher-speech" initial={reduced?{opacity:0}:{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={reduced?{opacity:0}:{opacity:0,y:-8}} transition={{duration:.28}}>
+            <div className="speech-meta"><span>{stage==='story'?'OPENING SCENE':stage==='assess'?'DIAGNOSTIC':stage==='teach'?bites[teachStep].label:stage==='try'?'LIVE COACHING':stage==='retry'?'POST-MORTEM':'VICTORY'}</span><em>{meme}</em></div>
+            <h2>{stage==='story'?'THE CRATER WAKES':stage==='assess'?'SHOW ME HOW YOUR BRAIN THINKS':stage==='teach'?bites[teachStep].title:stage==='try'?'YOUR TURN, HERETIC':stage==='retry'?'THAT CODE JUST DIED':'CONCEPT INSTALLED'}</h2>
+            <p>{stage==='story'?STORY[lesson.layer]:stage==='assess'?'I am not grading you. I am measuring the exact size of the hole in your knowledge so I can fill it properly.':stage==='teach'?bites[teachStep].body:stage==='try'?'Write the code yourself. Tell me what you expect before you press Run. When it fails, bring me the evidence.':stage==='retry'?`${roast(lesson.roast,roastIntensity)} ${message||'Change one small thing and run it again. I am not dumping the answer on you.'}':'You proved the behavior repeatedly. Next lesson unlocked. Try not to become emotionally attached to one correct answer.'}</p>
+            {stage==='teach'&&teachStep===1&&<div className="teacher-example"><span>THE TINY SPELL</span><pre>{lesson.starterCode}</pre></div>}
+            {stage==='retry'&&<div className="teacher-repair"><span>RECOVERY PLAN</span><b>1. Read the error → 2. Explain the mistake → 3. Change one thing → 4. Run again.</b></div>}
+          </motion.div>
+        </AnimatePresence>
+        <div className="teacher-quickbar">
+          {stage==='story'&&<button className="primary-teacher-action" onClick={()=>transition('assess')}><Play size={14}/> BEGIN THE TRIAL</button>}
+          {stage==='assess'&&<span>Pick one. Wrong answers only make PYTHONSURA smarter about how to teach you.</span>}
+          {stage==='teach'&&<button className="primary-teacher-action" onClick={teachNext}>{bites[teachStep].action} <ChevronRight size={15}/></button>}
+          {stage==='try'&&<button className="secondary-teacher-action" onClick={revealHint}><Sparkles size={14}/> NEED A TINY NUDGE?</button>}
+          {stage==='retry'&&<button className="primary-teacher-action" onClick={()=>transition('try')}>BACK TO THE CODE <ChevronRight size={15}/></button>}
+          {stage==='mastered'&&<button className="primary-teacher-action" onClick={onAdvance}>DESCEND TO THE NEXT WARD <ChevronRight size={15}/></button>}
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait"><motion.aside key={current.title+disturbance} className="disturbance-card" initial={{opacity:0,x:24,rotate:1}} animate={{opacity:1,x:0,rotate:0}} exit={{opacity:0,x:-10}} transition={{duration:.32}}><span className="disturbance-emoji">{current.emoji}</span><small>{current.title}</small><p>{current.text}</p></motion.aside></AnimatePresence>
+    </div>
+
+    {stage==='assess'&&<motion.div className="assessment-card" initial={{opacity:0,y:10}} animate={{opacity:1,y:0}}><div className="assessment-title"><span>ONE QUESTION. ZERO SHAME.</span><strong>What is the key idea behind <em>{lesson.topic}</em>?</strong></div>{optionSet.map((option,index)=><motion.button key={option} whileHover={reduced?undefined:{x:5}} whileTap={reduced?undefined:{scale:.99}} onClick={()=>pick(index)} className={`assessment-option ${answer===index?(index===0?'correct':'wrong'):''}`}>{String.fromCharCode(65+index)}<span>{option}</span></motion.button>)}</motion.div>}
+
+    <div className="meme-strip" aria-label="Hell classroom reactions">{[meme,current.emoji,'💀','🫠','🔥','🧠'].map((item,index)=><motion.span key={`${item}-${index}`} animate={reduced?undefined:{y:[0,-3,0]}} transition={{duration:1.9+index*.18,repeat:Infinity,ease:'easeInOut',delay:index*.08}}>{item}</motion.span>)}</div>
+
+    <div className="tutor-chat-live">
+      <div className="chat-live-head"><div><MessageCircle size={14}/><span>TALK TO PYTHONSURA</span><small>Ask anything. Seriously.</small></div><div className="mode-pills">{(['teacher','comedy','battle','senior-engineer'] as MentorMode[]).map(item=><button key={item} className={mode===item?'active':''} onClick={()=>setMode(item)}>{item.replace('-',' ')}</button>)}</div></div>
+      <div className="quick-prompts">{QUICK_PROMPTS.map(prompt=><button key={prompt} onClick={()=>quickAsk(prompt)}>{prompt}</button>)}</div>
+      <div className="chat-log-live" aria-live="polite">{chats.length===0&&<p>Try: “what is a variable?”, “why am I wrong?”, “show me a tiny example”, “roast this code”, or just swear at Python.</p>}{chats.map((chat,index)=><motion.div key={`${chat.role}-${index}`} className={`chat-bubble ${chat.role}`} initial={{opacity:0,y:8}} animate={{opacity:1,y:0}}><b>{chat.role==='user'?'YOU':'PYTHONSURA'}</b><span>{chat.text}</span></motion.div>)}</div>
+      <div className="chat-live-input"><input value={input} onChange={event=>setInput(event.target.value)} onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();void ask()}}} placeholder="Talk to your teacher…"/><button onClick={()=>void ask()} disabled={asking||!input.trim()}>{asking?'THINKING…':<><Send size={14}/> ASK</>}</button></div>
+      <div className="chat-live-foot"><span><Zap size={11}/> Real code + error + mastery context</span><span>{sound?'Sound on':'Sound off'} · {voice?'Tutor voice on':'Tutor voice muted'}</span></div>
+    </div>
+  </section>;
 }
