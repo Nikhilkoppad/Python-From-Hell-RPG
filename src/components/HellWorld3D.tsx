@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
-import { hellAudio } from '../engine/hellAudio';
 
 export type HellScenePhase = 'wake' | 'arrival' | 'choice' | 'portal' | 'guide' | 'launch';
 
