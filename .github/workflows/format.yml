@@ -1,0 +1,37 @@
+name: Format source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '.prettierrc.json'
+      - '.github/workflows/format.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  prettier:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore: format source') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Format source
+        run: npx --yes prettier@3.6.2 --write 'src/**/*.{ts,tsx,css}'
+
+      - name: Commit formatting changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet; then
+            echo 'Source is already formatted.'
+            exit 0
+          fi
+          git add src
+          git commit -m 'chore: format source with Prettier'
+          git push
