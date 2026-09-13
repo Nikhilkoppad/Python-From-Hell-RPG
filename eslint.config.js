@@ -33,4 +33,12 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': 'error',
     },
   },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
 );
