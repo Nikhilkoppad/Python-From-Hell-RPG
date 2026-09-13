@@ -1,5 +1,3 @@
-import { hellAudio } from '../hellAudio';
-
 export type VoiceActor = 'pythosura' | 'learner' | 'narrator' | 'boss' | 'system';
 
 export type VoiceLanguage = 'en' | 'hinglish';
