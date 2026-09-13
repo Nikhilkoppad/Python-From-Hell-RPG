@@ -1,96 +1,113 @@
 # PYTHON FROM HELL — MASTER DESIGN SYSTEM
 
-This is the shipped visual/interaction source of truth for the RPG. It applies the design-intelligence principles of UI/UX Pro Max while keeping a product-specific identity instead of copying a generic style.
+This is the shipped visual/interaction source of truth for the RPG. It applies design-intelligence principles associated with UI/UX Pro Max while keeping Python From Hell's own identity.
 
 ## Product idea
 
-**A dangerous tutor that turns Python learning into an adventure.** The learner should feel guided, not managed. The lesson is the stage; PYTHONSURA is the character; the editor is the weapon; mastery is the gate.
+**A dangerous tutor that turns Python learning into a survival adventure.** The learner wakes in Hell, meets Pythonsura, enters the dungeon, learns under pressure, writes real code, survives mistakes, and opens gates through mastery.
 
-## North-star interaction
+The product is a game with a learning system, not a learning dashboard with game decoration.
 
-`STORY → DIAGNOSTIC → TEACH → WRITE → RUN → REACT → EXPLAIN → RETRY → MASTER → DESCEND`
+## North-star experience
 
-Every screen should have one obvious next action. Secondary information should stay collapsed, contextual, or visually quiet.
+`WAKE → STORY → CHOOSE → ENTER DUNGEON → MEET PYTHONSURA → DIAGNOSTIC → TEACH → DOUBT → ADAPT → WRITE → RUN → REACT → ROAST → EXPLAIN → RETRY → MASTER → OPEN GATE`
+
+Every screen should answer four things immediately: **Where am I? What am I doing? Why am I doing it? What happens next?**
+
+## HellGate composition
+
+The opening is a cinematic sequence, not a welcome dashboard:
+1. Darkness and disorientation.
+2. Restrained chaos cues: screaming, shouting, metal, demons and distant Hell ambience.
+3. Ground shake and Pythonsura arrival.
+4. One-chance escape proposition.
+5. Accept/reject tension.
+6. Giant mouth/portal entry.
+7. Mini-Pythonsura guide introduction.
+8. Guide accept/reject, with mandatory guide after rejection.
+9. English/Hinglish choice.
+10. Final descent into the first dungeon chamber.
+
+Story motion must have narrative meaning. The system must never use random motion merely to make the screen look busy.
+
+## Living Classroom
+
+Once inside the dungeon, the lesson becomes the stage and Pythonsura becomes the instructor.
+
+`STORY → DIAGNOSTIC → MICRO-TEACH → DOUBT CHECK → ADAPTIVE RE-TEACH → PROGRESSIVE TRIAL → REAL EXECUTION → REACTION → RETRY → MASTERY`
+
+The teacher is visually dominant. The editor is the learner's weapon. The runtime is the judge. The gate is the reward.
 
 ## Visual language
 
 - Deep black foundation with volcanic red/orange action color and restrained bruised-purple depth.
-- High-contrast editorial typography for headings; compact monospace for system labels and code.
-- Sharp panels with subtle borders, not floating glass cards everywhere.
-- Texture comes from light, shadow, grain-like gradients, restrained motion and interaction—not decorative polygons.
-- Avoid generic cyberpunk, rotating octagons, excessive neon, random particles, fake telemetry, and dashboard clutter.
+- Strong editorial typography for story moments; compact monospace for system labels and code.
+- Sharp panels with deliberate hierarchy rather than a pile of floating cards.
+- Texture from light, shadow, grain-like gradients and meaningful movement.
+- Dungeon motifs: darkness, smoke, gates, carved Python symbols, torches, cracks, portals and restrained creature silhouettes.
 
-## Lesson composition
+Avoid generic cyberpunk, rotating octagons, random polygons, excessive particles, fake telemetry, dashboard clutter and unexplained futuristic widgets.
 
-1. **Living Classroom** — the lesson fills the screen and makes PYTHONSURA the teacher, not a side widget.
-2. **Adventure Scene** — establish where the learner is and why the topic matters.
-3. **One diagnostic** — identify the learner's starting mental model.
-4. **Micro-teaching** — explain a single idea in tiny bites, with a minimal demonstration.
-5. **Disturbance Feed** — unpredictable but harmless teacher/Hell interruptions keep the learner alert and reinforce the theme.
-6. **Live Mission** — tell the learner exactly what to write.
-7. **Runtime reaction** — show stdout, stderr, timeout, or failure plainly.
-8. **Teacher reaction** — PYTHONSURA talks, roasts the code, explains the mistake, and gives the smallest next step.
-9. **Conversation** — the learner can ask questions in natural language and the tutor receives code/error/mastery context plus the lesson conversation history.
-10. **Repeated proof** — mastery requires successful behavior over multiple attempts.
-11. **Descent transition** — the next lesson is earned, not clicked.
+## Pythonsura personality
 
-## Motion rules
+Pythonsura is an intelligent Indian-style developer demon and teacher. In English mode he speaks English with aggressive developer humor. In Hinglish mode he speaks primarily Hinglish with Indian-style roasting and gaalis. Technical teaching stays accurate.
 
-Motion is used for meaning: entering the teacher scene, stage changes, disturbance arrivals, tutor reactions, chat messages, success/failure acknowledgement, and descent transitions. Never animate content that does not benefit from it.
+Roasts are contextual. They target the learner's current coding performance, mistake or game situation, not protected classes or inherent personal worth. The comedy must lead into a useful explanation or next action.
 
-Use reduced-motion support for every non-essential animation. Prefer opacity/transform/layout transitions. Avoid high-frequency decorative animation.
-
-The project uses the open-source `motion` package and imports React features from `motion/react`.
-
-## Tutor personality
-
-PYTHONSURA behaves like a JARVIS-style teacher with developer-Hell humor. It can use playful profanity, memes, emoji reactions, mockery of bad code and exaggerated reactions. It never attacks protected classes or the learner's inherent worth.
-
-The tutor should:
-- ask what the learner tried;
-- teach one concept at a time;
-- demonstrate before demanding code;
-- avoid dumping full solutions by default;
-- remember conversation context during a lesson;
-- use the learner's actual code/error/mastery context;
-- adapt support after repeated mistakes;
-- speak responses aloud when tutor voice is enabled.
+Pythonsura can:
+- diagnose prior knowledge;
+- explain like the learner is a beginner;
+- demonstrate code before demanding it;
+- answer free-form questions;
+- remember the lesson conversation;
+- inspect actual code and runtime results;
+- switch Teacher / Comedy / Battle / Senior Engineer modes;
+- give escalating but useful support after repeated mistakes;
+- speak dialogue using browser voice when enabled.
 
 ## Disturbance system
 
-The classroom periodically receives a small **Unauthorized Interruption** such as a meme drop, fake incident report, code-review alert, variable escape, senior-engineer call, traceback grave or brain-cell report. Interruptions are short, reversible and never block the learning flow. They should feel like the environment is reacting to the learner rather than playing a static slideshow.
+The dungeon may interrupt with compact contextual events: Python police, senior-engineer calls, code-review alerts, traceback funerals, meme transmissions, variable riots, brain-cell alerts and snake fact checks. These exist to keep the classroom alive, not to distract the learner. They must be dismissible, brief and semantically tied to learning.
+
+## Adaptive re-teaching
+
+After a diagnostic or failure, the teacher can change strategy:
+- simple explanation;
+- real-life analogy;
+- visual flow;
+- code walkthrough;
+- interactive practice.
+
+The teacher asks what the learner does not understand instead of dumping the same explanation repeatedly.
+
+## Progressive mastery gauntlet
+
+Each lesson has a 20-step challenge opportunity ladder spanning recognition, prediction, implementation, trace/debug, variation, edge cases, transfer, interview reasoning, production thinking and final proof. The runtime challenge is the real judge; one lucky execution never represents complete mastery.
+
+Repeated failures trigger remediation and lower-complexity practice. Strong success may increase difficulty.
 
 ## Information hierarchy
 
-**Primary:** what do I need to understand/do now?
+**Primary:** teacher instruction and current mission.
 
-**Secondary:** why this works, current mastery, one hint, teacher chat.
+**Secondary:** one hint, mastery state, runtime result, contextual reaction, conversation.
 
-**Tertiary:** system metadata, settings, advanced metrics, implementation notes.
+**Tertiary:** settings, implementation metadata and advanced system details.
 
-Tertiary information should never compete with the teaching action.
+Tertiary information must never compete with the lesson's next action.
 
-## Voice and feedback
+## Motion rules
 
-Prefer concrete reactions:
-- `THE CRATER WAKES`
-- `SHOW ME HOW YOUR BRAIN THINKS`
-- `THE IDEA`
-- `PYTHONSURA DEMONSTRATES`
-- `YOUR TURN, HERETIC`
-- `THAT CODE JUST DIED`
-- `CONCEPT INSTALLED`
+Use Motion for React for meaningful scene/stage transitions, teacher reactions, portal entry, ground shake, chat arrival and success/failure acknowledgement. Prefer transform/opacity/layout transitions. Every non-essential animation must respect reduced-motion preferences.
 
-Feedback should say what happened and what to do next. Avoid vague `Something went wrong` messaging.
+## Sound and voice
+
+Sound is part of the story when enabled: subtle rumble, portal/impact cues and lesson feedback. Browser speech is additive for Pythonsura dialogue. The experience must remain fully understandable with sound or voice disabled.
 
 ## Accessibility
 
-Maintain visible focus, strong contrast, keyboard operation, semantic controls, readable type, reduced motion, and live regions for runtime/tutor feedback. Voice is additive; the lesson must remain fully usable without it.
-
-## Responsive behavior
-
-Desktop can expose the full living classroom and teacher conversation. Tablet collapses the disturbance column. Mobile becomes a vertical story → teacher → mission → editor → conversation flow. Do not force dense desktop information architecture onto a phone.
+Keyboard navigation, visible focus, strong contrast, semantic controls, readable typography, live tutor/runtime feedback, reduced motion and responsive layouts are mandatory.
 
 ## Design provenance
 
-The methodology was informed by the public UI/UX Pro Max skill by NextLevelBuilder, whose current public skill describes design-system generation, style matching, UX guidelines, responsive guidance, and pre-delivery review. This file is a product-specific implementation, not a copy of that project's assets.
+The methodology was informed by the public UI/UX Pro Max skill by NextLevelBuilder. This design system is a product-specific implementation and does not copy external assets.
