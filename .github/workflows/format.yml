@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'package.json'
       - '.prettierrc.json'
       - '.github/workflows/format.yml'
 
@@ -21,8 +22,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
       - name: Format source
-        run: npx --yes prettier@3.6.2 --write 'src/**/*.{ts,tsx,css}'
+        run: npm run format
 
       - name: Commit formatting changes
         run: |
@@ -33,5 +43,5 @@ jobs:
             exit 0
           fi
           git add src
-          git commit -m 'chore: format source with Prettier'
+          git commit -m 'chore: format source'
           git push
