@@ -1,27 +1,30 @@
 # PYTHON FROM HELL RPG
 
-A story-driven Python learning RPG, browser coding IDE, debugging dungeon, boss gauntlet, interview arena, project factory, adaptive mentor, and developer-Hell experience.
+A story-driven Python learning RPG, browser coding IDE, debugging dungeon, boss gauntlet, interview arena, project factory, adaptive tutor, and developer-Hell experience.
 
 ## Current build
 
 - HellGate onboarding with persistent resume state and a real fresh-start reset path
-- Command Center + 12-layer curriculum
+- Command Center + 12-layer curriculum with story signals and adventure progression
 - 70 data-driven lessons from Python basics to CPython internals
+- Tutor-first lesson flow: STORY → ASSESS → TEACH → TRY → ROAST/EXPLAIN → RETRY → MASTER
+- PYTHONSURA JARVIS-style tutor panel with progressive hints, memes/emojis, playful profanity, and four mentor modes
+- Every lesson begins with a short story/diagnostic and requires repeated successful behavior checks before mastery unlocks the next lesson
+- Live tutor chat is built into the lesson workspace and receives the learner's code, runtime output, mastery and mistake context
+- Built-in local Ollama mentor path defaults to `http://localhost:11434/api` with `gemma4:latest`, while keeping a deterministic fallback when Ollama is unavailable
 - Browser Python execution in a Web Worker using Pyodide, with a warm worker between sequential runs and automatic teardown on timeout/cancellation
 - Execution errors, stderr/stdout capture, timeout protection, cancellation, and worker isolation
 - Lesson challenges with required concepts and client-side private behavior harnesses
 - Adaptive attempts: successes, failures, timeout/runtime-error classification, hint usage, elapsed time, mastery, remediation-oriented hint progression, and persisted mastery signals
 - Lesson draft autosave per lesson so unfinished code survives navigation and refresh
-- XP, levels, streaks, achievements, one-time activity rewards, and versioned local persistence
+- XP, levels, streaks, achievements, one-time activity rewards, sound effects, motion cues, and versioned local persistence
 - Portable v3 save export/import with validation, plus local-save reset
 - Seven multi-phase bosses with executable coding gates and persisted phase progress
 - Eight debugging dungeon cases with executable fix checks
 - 30-question interview battle arena with full rank ladder, explanation/follow-up retry flow, and targeted code tasks
 - The Core finale unlocks a dedicated runtime-access cinematic after the final boss is cleared
 - Six executable project tracks with contract tests, persistent started/completed state, and one-time completion rewards
-- PYTHONSURA AI mentor with optional OpenAI-compatible endpoint and deterministic offline fallback
-- Functional settings for roast intensity, sound preference, reduced motion, portable saves, and local-save reset
-- Story signals, responsive desktop/tablet/mobile navigation, keyboard shortcuts, visible focus states, reduced-motion handling, and crash recovery
+- Responsive desktop/tablet/mobile navigation, keyboard shortcuts, visible focus states, reduced-motion handling, and crash recovery
 
 ## Development
 
@@ -32,7 +35,7 @@ npm run build
 npm run dev
 ```
 
-`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, runtime cancellation, adaptive learning wiring, lesson drafts, accessibility feedback, save portability, mobile navigation, the single active application entrypoint, interview progression contracts, and other anti-regression rules. GitHub Actions runs verification before the production build.
+`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, runtime cancellation, adaptive learning wiring, tutor-first lesson gates, lesson drafts, accessibility feedback, save portability, mobile navigation, the single active application entrypoint, local AI wiring, and other anti-regression rules. GitHub Actions runs verification before the production build.
 
 ## Runtime targets
 
@@ -40,15 +43,15 @@ The browser execution layer uses Pyodide 314.0.6 and therefore runs CPython 3.14
 
 ## AI mentor
 
-Set `VITE_MENTOR_ENDPOINT` and optionally `VITE_MENTOR_MODEL` for an OpenAI-compatible `/chat/completions` endpoint. Without those variables, PYTHONSURA stays available through a deterministic local fallback, so the learning loop does not depend on an external AI service.
+PYTHONSURA first tries the built-in local Ollama API at `http://localhost:11434/api/chat` using `gemma4:latest`. Ollama's local API requires no authentication, and local browser origins can be allowed through its CORS configuration. An optional `VITE_MENTOR_ENDPOINT` + `VITE_MENTOR_MODEL` can still override this with an OpenAI-compatible provider. When every provider is unavailable, PYTHONSURA falls back to deterministic local guidance so the lesson loop stays usable. 
 
 ## Architecture
 
-`src/domain` contains curriculum and experience data. `src/engine` contains progression, rewards, adaptive logic, challenges, streaks, and unlocks. `src/execution` isolates browser Python execution. `src/components` contains interactive workspaces, including the interview battle arena. `src/ai` contains the provider-neutral mentor adapter. Root-level UI polish styles are imported by `src/main.tsx`.
+`src/domain` contains curriculum and experience data. `src/engine` contains progression, rewards, adaptive logic, challenges, streaks, unlocks and audio. `src/execution` isolates browser Python execution. `src/components` contains interactive workspaces, including the tutor-driven lesson workspace and interview battle arena. `src/ai` contains the provider-neutral mentor adapter. Root-level UI polish styles are imported by `src/main.tsx`.
 
 The core loop is:
 
-`STORY → LEARN → TRY → FAIL/SUCCEED → ROAST → EXPLAIN → RETRY → MASTER → XP → UNLOCK → NEW HELL`
+`STORY → ASSESS → TEACH → TRY → FAIL/SUCCEED → ROAST → EXPLAIN → RETRY → MASTER → XP → UNLOCK → NEW HELL`
 
 ## Important limitation
 
