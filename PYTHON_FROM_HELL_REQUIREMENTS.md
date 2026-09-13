@@ -4,7 +4,7 @@ This file is the implementation contract for the Python From Hell RPG. Features 
 
 ## Core identity
 
-Python From Hell is a story-driven Python learning RPG that combines a structured course, browser coding IDE, debugging dungeon, boss battles, interview simulator, project factory, adaptive learning, and an optional AI mentor.
+Python From Hell is a story-driven Python learning RPG that combines a structured course, browser coding IDE, debugging dungeon, boss battles, interview simulator, project factory, adaptive learning, and a built-in local AI tutor.
 
 The visual identity is premium game/Hell-themed UI: deep black, volcanic red, dark purple, burnt orange, sharp typography, subtle particles and restrained glow. Do not use generic cyberpunk polygons, rotating octagons, or unrelated decorative geometry.
 
@@ -28,13 +28,15 @@ Layer order:
 
 The target content set is at least 70 lessons, 8 debugging cases, exactly 30 interview questions, exactly 7 bosses with 21 executable phases, and exactly 6 executable projects.
 
-## Lesson loop
+## Tutor-first lesson loop
 
-A lesson must support:
+Every lesson should feel like a tutor-led adventure rather than a static dashboard:
 
-STORY → LEARN → TRY → FAIL/SUCCEED → ROAST/EXPLAIN → RETRY → MASTERY → XP → UNLOCK
+STORY → ASSESS → TEACH → TRY → FAIL/SUCCEED → ROAST/EXPLAIN → RETRY → MASTERY → XP → UNLOCK
 
-The code must run in the browser without freezing the main UI. Challenges must be behaviorally evaluated. Client-side "private" tests may improve learning but must not be described as tamper-proof server-side grading.
+At lesson entry, the tutor should present a short story/mission. A small diagnostic should establish the learner's starting point. Teaching should break the concept into beginner-friendly steps and a tiny example. The learner must then write and execute the challenge themselves. Failed attempts should trigger a roast plus technical explanation and a smaller next step. Successful attempts should continue to be checked until mastery is earned; a lucky single pass must not immediately unlock the lesson.
+
+The tutor should be conversational and always available inside the lesson. It should accept natural-language questions, explain code and errors, teach incrementally, and use playful memes, emojis and occasional profanity while remaining technically accurate and non-discriminatory.
 
 Lesson reward targets: lesson 20 XP, challenge 30 XP, no-hint 15 XP.
 
@@ -90,9 +92,7 @@ Persistence is versioned and must migrate older save structures safely. Invalid 
 
 ## AI mentor
 
-PYTHONSURA supports Comedy, Teacher, Battle and Senior Engineer modes. The mentor receives lesson/challenge/code/error/mastery context and should encourage the learner to try a smaller step before giving a full solution.
-
-The app must remain usable without an external AI service through the deterministic fallback.
+PYTHONSURA supports Comedy, Teacher, Battle and Senior Engineer modes. The built-in path should first use local Ollama when available, with a default local model configured for this project, and then fall back deterministically when no provider is reachable. The mentor receives lesson/challenge/code/error/mastery context and should encourage the learner to try a smaller step before giving a full solution.
 
 ## Advanced CPython accuracy
 
@@ -104,7 +104,7 @@ Current project targets:
 
 ## Accessibility and UX
 
-Support keyboard navigation, visible focus, readable contrast, semantic controls, reduced motion and responsive layouts. Ctrl/Cmd+Enter should run code in coding workspaces where practical. Running workspaces should expose a stop action where execution can otherwise outlive the user's intent.
+Support keyboard navigation, visible focus, readable contrast, semantic controls, reduced motion and responsive layouts. Ctrl/Cmd+Enter should run code in coding workspaces where practical. Running workspaces should expose a stop action where execution can otherwise outlive the user's intent. Tutor motion and sound cues must respect the reduced-motion and sound settings.
 
 ## Release gate
 
@@ -117,4 +117,6 @@ Before declaring the project finished:
 - No fake interaction or dead active buttons remain.
 - Rewards cannot be farmed by replaying a completed activity.
 - Bosses, projects, lessons, debugging and interview flows all execute real logic.
+- Tutor-first lesson flow is wired into the active lesson workspace.
+- Built-in local AI path and deterministic fallback are wired.
 - README matches the shipped architecture.
