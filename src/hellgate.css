@@ -109,7 +109,7 @@
     transparent
   );
 
-  font: 8px "JetBrains Mono", monospace;
+  font: 500 8px var(--font-mono);
   letter-spacing: 0.12em;
 }
 
@@ -150,8 +150,8 @@
   top: 50% !important;
   left: 50% !important;
 
-  right: auto !important;
-  bottom: auto !important;
+  right: auto;
+  bottom: auto;
 
   width: min(720px, calc(100vw - 48px)) !important;
   max-height: calc(100vh - 120px);
@@ -160,9 +160,9 @@
 
   transform: translate(-50%, -50%) !important;
 
-  padding: 32px 36px !important;
+  padding: 32px 36px;
 
-  border: 1px solid #6b3b3e;
+  border: 1px solid var(--color-border-strong);
 
   background: linear-gradient(
     180deg,
@@ -305,7 +305,7 @@
   background: #220c10;
   color: #ffac93;
 
-  font: 9px "JetBrains Mono", monospace;
+  font: 500 9px var(--font-mono);
 
   letter-spacing: 0.09em;
 
@@ -406,7 +406,7 @@
 
   color: #ff7654;
 
-  font: 8px "JetBrains Mono", monospace;
+  font: 500 8px var(--font-mono);
 
   letter-spacing: 0.14em;
 
@@ -568,7 +568,7 @@
 
   color: #ff8b6d;
 
-  font: 9px "JetBrains Mono", monospace;
+  font: 500 9px var(--font-mono);
 
   letter-spacing: 0.1em;
 }
@@ -741,7 +741,7 @@
 
   text-align: center;
 
-  font: 10px "JetBrains Mono", monospace;
+  font: 500 10px var(--font-mono);
 
   text-shadow: 0 2px 8px #000;
 
@@ -812,20 +812,20 @@
   }
 
   .language-card {
-    top: 50% !important;
+    top: 50%;
 
-    left: 12px !important;
-    right: 12px !important;
+    left: 12px;
+    right: 12px;
 
-    bottom: auto !important;
+    bottom: auto;
 
-    width: auto !important;
+    width: auto;
 
     max-height: calc(100vh - 90px);
 
     transform: translateY(-50%) !important;
 
-    padding: 22px !important;
+    padding: 22px;
   }
 
   .language-card h1 {
