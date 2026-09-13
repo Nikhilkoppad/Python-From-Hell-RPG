@@ -40,5 +40,8 @@ export default tseslint.config(
         ...globals.node,
       },
     },
+    rules: {
+      'no-useless-escape': 'warn',
+    },
   },
 );
