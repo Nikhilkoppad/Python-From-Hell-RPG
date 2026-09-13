@@ -233,90 +233,244 @@ export function HellGateExperience({ hasSave = false, onComplete, onResume, onSt
         </header>
         <AnimatePresence mode="wait">
           {phase === 'language' && (
-            <motion.section key="language" className="cinema-card language-card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="cinema-kicker"><Globe size={14} /> {t.langKicker}</div>
+            <motion.section
+              key="language"
+              className="cinema-card language-card"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="cinema-kicker">
+                <Globe size={14} /> {t.langKicker}
+              </div>
               <h1>{t.langTitle}</h1>
               <p>{t.langBody}</p>
               <div className="voice-choice">
-                <button className={language === 'en' ? 'chosen' : ''} onClick={() => { setLanguage('en'); setExperienceLanguage('en'); }}>
-                  <strong>🇬🇧 {t.eng}</strong><span>{t.engDesc}</span>
+                <button
+                  className={language === 'en' ? 'chosen' : ''}
+                  onClick={() => {
+                    setLanguage('en');
+                    setExperienceLanguage('en');
+                  }}
+                >
+                  <strong>🇬🇧 {t.eng}</strong>
+                  <span>{t.engDesc}</span>
                 </button>
-                <button className={language === 'hinglish' ? 'chosen' : ''} onClick={() => { setLanguage('hinglish'); setExperienceLanguage('hinglish'); }}>
-                  <strong>🇮🇳 {t.hi}</strong><span>{t.hiDesc}</span>
+                <button
+                  className={language === 'hinglish' ? 'chosen' : ''}
+                  onClick={() => {
+                    setLanguage('hinglish');
+                    setExperienceLanguage('hinglish');
+                  }}
+                >
+                  <strong>🇮🇳 {t.hi}</strong>
+                  <span>{t.hiDesc}</span>
                 </button>
               </div>
-              <button className="cinema-action" onClick={() => choose(language)}>{t.lock}<ChevronRight /></button>
-              {hasSave && <div className="return-choice"><button onClick={onResume}>{t.resume}</button><button onClick={onStartFresh}>{t.fresh}</button></div>}
+              <button className="cinema-action" onClick={() => choose(language)}>
+                {t.lock}
+                <ChevronRight />
+              </button>
+              {hasSave && (
+                <div className="return-choice">
+                  <button onClick={onResume}>{t.resume}</button>
+                  <button onClick={onStartFresh}>{t.fresh}</button>
+                </div>
+              )}
             </motion.section>
           )}
           {phase === 'wake' && (
-            <motion.section key="wake" className="cinema-caption wake-caption" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <div className="cinema-kicker">{t.wakeKicker}</div><h1>{t.wakeTitle}</h1><p>{t.wakeBody}</p>
-              <div className="cinema-soundline">SCREAMS · CHAINS · WIND · FIRE · DISTANT DEMONS</div>
+            <motion.section
+              key="wake"
+              className="cinema-caption wake-caption"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="cinema-kicker">{t.wakeKicker}</div>
+              <h1>{t.wakeTitle}</h1>
+              <p>{t.wakeBody}</p>
+              <div className="cinema-soundline">
+                SCREAMS · CHAINS · WIND · FIRE · DISTANT DEMONS
+              </div>
               <div className="cinema-dialogue">{t.learner}</div>
-              <button className="cinema-action" onClick={() => go('arrival')}>{t.wakeButton}<ChevronRight /></button>
+              <button className="cinema-action" onClick={() => go('arrival')}>
+                {t.wakeButton}
+                <ChevronRight />
+              </button>
             </motion.section>
           )}
           {phase === 'arrival' && (
-            <motion.section key="arrival" className="cinema-caption demon-caption" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-              <div className="cinema-kicker">{t.arrivalKicker}</div><div className="demon-name"><Skull size={15} /> PYTHONSURA</div>
-              <h1>{t.arrivalTitle}</h1><p>{t.arrivalBody}</p><blockquote>{t.arrivalLine}</blockquote><p className="cinema-chance">{t.chance}</p>
+            <motion.section
+              key="arrival"
+              className="cinema-caption demon-caption"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="cinema-kicker">{t.arrivalKicker}</div>
+              <div className="demon-name">
+                <Skull size={15} /> PYTHONSURA
+              </div>
+              <h1>{t.arrivalTitle}</h1>
+              <p>{t.arrivalBody}</p>
+              <blockquote>{t.arrivalLine}</blockquote>
+              <p className="cinema-chance">{t.chance}</p>
               <div className="cinema-actions">
-                <button className="cinema-action" data-story-action="ACCEPT THE DESCENT" onClick={() => go('portal')}>{t.accept}<Zap /></button>
-                <button className="cinema-ghost" onClick={() => go('choice')}>{t.reject}</button>
+                <button
+                  className="cinema-action"
+                  data-story-action="ACCEPT THE DESCENT"
+                  onClick={() => go('portal')}
+                >
+                  {t.accept}
+                  <Zap />
+                </button>
+                <button className="cinema-ghost" onClick={() => go('choice')}>
+                  {t.reject}
+                </button>
               </div>
             </motion.section>
           )}
           {phase === 'choice' && (
-            <motion.section key="choice" className="cinema-caption" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }}>
-              <div className="cinema-kicker">PYTHONSURA IS LAUGHING</div><h1>NO EXIT.</h1><p>{t.forced}</p>
-              <button className="cinema-action" onClick={() => go('portal')}>{t.accept}<ChevronRight /></button>
+            <motion.section
+              key="choice"
+              className="cinema-caption"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="cinema-kicker">PYTHONSURA IS LAUGHING</div>
+              <h1>NO EXIT.</h1>
+              <p>{t.forced}</p>
+              <button className="cinema-action" onClick={() => go('portal')}>
+                {t.accept}
+                <ChevronRight />
+              </button>
             </motion.section>
           )}
           {phase === 'portal' && (
-            <motion.section key="portal" className="cinema-caption portal-caption" initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-              <div className="cinema-kicker">{t.portalTitle}</div><h1>LOOK AT THE TEETH.</h1><p>{t.portalBody}</p><blockquote>{t.portalLine}</blockquote>
-              <div className="cinema-dialogue">{t.learnerPortal}</div><div className="demon-line">{t.demonPortal}</div>
-              <button className="cinema-action" onClick={() => {
-                void (async () => {
-                  const learner = await voiceManager.playAndWait(voiceLine(voiceIds.portalLearner, t.learnerPortal, 'learner', language, { priority: 'high' }));
-                  if (!learner) return;
-                  const demon = await voiceManager.playAndWait(voiceLine(voiceIds.portalPythosura, t.demonPortal, 'pythosura', language, { priority: 'high' }));
-                  if (demon) go('guide');
-                })();
-              }}>
-                <Zap />{t.enter}
+            <motion.section
+              key="portal"
+              className="cinema-caption portal-caption"
+              initial={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="cinema-kicker">{t.portalTitle}</div>
+              <h1>LOOK AT THE TEETH.</h1>
+              <p>{t.portalBody}</p>
+              <blockquote>{t.portalLine}</blockquote>
+              <div className="cinema-dialogue">{t.learnerPortal}</div>
+              <div className="demon-line">{t.demonPortal}</div>
+              <button
+                className="cinema-action"
+                onClick={() => {
+                  void (async () => {
+                    const learner = await voiceManager.playAndWait(
+                      voiceLine(voiceIds.portalLearner, t.learnerPortal, 'learner', language, {
+                        priority: 'high',
+                      }),
+                    );
+                    if (!learner) return;
+                    const demon = await voiceManager.playAndWait(
+                      voiceLine(voiceIds.portalPythosura, t.demonPortal, 'pythosura', language, {
+                        priority: 'high',
+                      }),
+                    );
+                    if (demon) go('guide');
+                  })();
+                }}
+              >
+                <Zap />
+                {t.enter}
               </button>
             </motion.section>
           )}
           {phase === 'guide' && (
-            <motion.section key="guide" className="cinema-caption guide-caption" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-              <div className="cinema-kicker">PYTHON DUNGEON // COMPANION DETECTED</div><div className="mini-tag">🐍 MINI-PYTHOSURA</div>
-              <h1>{t.guideTitle}</h1><p>{t.guideBody}</p><blockquote>{t.guideLine}</blockquote>
+            <motion.section
+              key="guide"
+              className="cinema-caption guide-caption"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="cinema-kicker">PYTHON DUNGEON // COMPANION DETECTED</div>
+              <div className="mini-tag">🐍 MINI-PYTHOSURA</div>
+              <h1>{t.guideTitle}</h1>
+              <p>{t.guideBody}</p>
+              <blockquote>{t.guideLine}</blockquote>
               <div className="cinema-actions">
-                <button className="cinema-action" onClick={() => go('launch')}>{t.guideAccept}<ChevronRight /></button>
-                <button className="cinema-ghost" onClick={() => { speak(t.guideForced, sound, language, 'demon', voiceIds.guideForced); go('forced'); }}>{t.guideReject}</button>
+                <button className="cinema-action" onClick={() => go('launch')}>
+                  {t.guideAccept}
+                  <ChevronRight />
+                </button>
+                <button
+                  className="cinema-ghost"
+                  onClick={() => {
+                    speak(t.guideForced, sound, language, 'demon', voiceIds.guideForced);
+                    go('forced');
+                  }}
+                >
+                  {t.guideReject}
+                </button>
               </div>
             </motion.section>
           )}
           {phase === 'forced' && (
-            <motion.section key="forced" className="cinema-caption guide-caption" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-              <div className="cinema-kicker">GUIDE CONTRACT // NON-NEGOTIABLE</div><div className="mini-tag">🐍 MINI-PYTHOSURA</div>
-              <h1>FINE. YOU'RE GETTING A GUIDE.</h1><blockquote>{t.guideForced}</blockquote>
-              <button className="cinema-action" onClick={() => go('launch')}>ACCEPT THE LITTLE BASTARD <ChevronRight /></button>
+            <motion.section
+              key="forced"
+              className="cinema-caption guide-caption"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="cinema-kicker">GUIDE CONTRACT // NON-NEGOTIABLE</div>
+              <div className="mini-tag">🐍 MINI-PYTHOSURA</div>
+              <h1>FINE. YOU'RE GETTING A GUIDE.</h1>
+              <blockquote>{t.guideForced}</blockquote>
+              <button className="cinema-action" onClick={() => go('launch')}>
+                ACCEPT THE LITTLE BASTARD <ChevronRight />
+              </button>
             </motion.section>
           )}
           {phase === 'launch' && (
-            <motion.section key="launch" className="cinema-caption launch-caption" initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-              <div className="rift-mark" /><div className="cinema-kicker">{t.launchKicker}</div><h1>{t.launchTitle}</h1><p>{t.launchBody}</p>
-              <div className="rules"><span>01 // PYTHONSURA TEACHES</span><span>02 // YOU WRITE</span><span>03 // RUNTIME JUDGES</span><span>04 // MASTERY OPENS THE GATE</span></div>
-              <button className="cinema-action massive" onClick={complete}>{t.launch}<ChevronRight /></button>
+            <motion.section
+              key="launch"
+              className="cinema-caption launch-caption"
+              initial={{ opacity: 0, scale: 0.92 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="rift-mark" />
+              <div className="cinema-kicker">{t.launchKicker}</div>
+              <h1>{t.launchTitle}</h1>
+              <p>{t.launchBody}</p>
+              <div className="rules">
+                <span>01 // PYTHONSURA TEACHES</span>
+                <span>02 // YOU WRITE</span>
+                <span>03 // RUNTIME JUDGES</span>
+                <span>04 // MASTERY OPENS THE GATE</span>
+              </div>
+              <button className="cinema-action massive" onClick={complete}>
+                {t.launch}
+                <ChevronRight />
+              </button>
             </motion.section>
           )}
         </AnimatePresence>
       </div>
       <div className="cinema-subtitle" aria-live="polite">
-        {phase === 'arrival' ? t.arrivalLine : phase === 'portal' ? t.demonPortal : phase === 'guide' ? t.guideLine : phase === 'forced' ? t.guideForced : phase === 'wake' ? t.learner : ''}
+        {phase === 'arrival'
+          ? t.arrivalLine
+          : phase === 'portal'
+            ? t.demonPortal
+            : phase === 'guide'
+              ? t.guideLine
+              : phase === 'forced'
+                ? t.guideForced
+                : phase === 'wake'
+                  ? t.learner
+                  : ''}
       </div>
     </main>
   );
