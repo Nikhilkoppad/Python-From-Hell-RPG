@@ -98,7 +98,7 @@ function speak(
   enabled: boolean,
   language: 'en' | 'hinglish',
   id?: string,
-  actor: 'pythonsura' | 'learner' = 'pythonsura',
+  actor: 'pythosura' | 'learner' = 'pythosura',
 ) {
   if (!enabled) return;
   const clean = text.replace(/[`*_#]/g, '').trim();
@@ -276,7 +276,7 @@ export function TutorGuide({
             retry: 'The gate stays closed until the concept sticks.',
             mastered: 'Good. You kept the concept.',
           } as Record<Stage, string>);
-    speak(line[next], voice, language, `tutorguide/stage/${next}`, 'pythonsura');
+    speak(line[next], voice, language, `tutorguide/stage/${next}`, 'pythosura');
   };
   const pick = (i: number) => {
     setAnswer(i);
