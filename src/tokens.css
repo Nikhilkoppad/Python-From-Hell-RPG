@@ -1,0 +1,192 @@
+/* Python From Hell — design system v2. Semantic tokens are the component-facing API. */
+
+:root {
+  --ember-9: #ff5a36;
+  --ember-10: #ff7359;
+  --ember-11: #ffb08f;
+  --ember-12: #ffd0c3;
+
+  --ink-1: #020104;
+  --ink-2: #080609;
+  --ink-3: #0b090c;
+  --ink-4: #100d11;
+  --ink-5: #160d12;
+
+  --ash-12: #e7dde0;
+  --ash-11: #b0a3aa;
+  --ash-10: #91858b;
+  --ash-8: #6d6268;
+
+  --blood-6: #a84e3f;
+  --blood-5: #493338;
+  --blood-4: #392b31;
+
+  --color-bg: var(--ink-1);
+  --color-bg-sunken: var(--ink-2);
+  --color-surface: var(--ink-3);
+  --color-surface-raised: var(--ink-4);
+  --color-text: var(--ash-12);
+  --color-muted: var(--ash-11);
+  --color-faint: var(--ash-10);
+  --color-accent: var(--ember-9);
+  --color-accent-hover: var(--ember-10);
+  --color-accent-soft: var(--ember-11);
+  --color-accent-text: var(--ember-12);
+  --color-border: var(--blood-5);
+  --color-border-strong: var(--blood-6);
+  --color-focus: var(--ember-12);
+  --color-danger: #ff4b3e;
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-exit: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --duration-micro: 90ms;
+  --duration-short: 160ms;
+  --duration-medium: 260ms;
+  --duration-long: 400ms;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --radius-s: 6px;
+  --radius-m: 10px;
+  --radius-l: 16px;
+  --radius-pill: 999px;
+
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 10px 35px rgba(255, 87, 53, 0.2);
+  --shadow-3: 0 18px 60px rgba(0, 0, 0, 0.65);
+  --glass: rgba(11, 9, 12, 0.72);
+  --blur: 16px;
+
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.primary-cta,
+.cinema-action,
+.run-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-m);
+  background: var(--color-accent);
+  color: #1b0805;
+  font: 600 15px/1 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background var(--duration-short) var(--ease-standard),
+    transform var(--duration-short) var(--ease-standard),
+    box-shadow var(--duration-short) var(--ease-standard);
+}
+
+.primary-cta:hover,
+.cinema-action:hover,
+.run-btn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+.primary-cta:active,
+.cinema-action:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.primary-cta:disabled,
+.run-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.gate-secondary,
+.cinema-ghost,
+.back-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-m);
+  background: transparent;
+  color: var(--color-text);
+  font: 600 14px/1 var(--font-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color var(--duration-short) var(--ease-standard),
+    color var(--duration-short) var(--ease-standard),
+    background var(--duration-short) var(--ease-standard);
+}
+
+.gate-secondary:hover,
+.cinema-ghost:hover,
+.back-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent-soft);
+  background: rgba(255, 90, 54, 0.06);
+}
+
+.topbar button,
+.cinema-top button {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--color-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-s);
+  cursor: pointer;
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    border-color var(--duration-micro) var(--ease-standard);
+}
+
+.topbar button:hover,
+.cinema-top button:hover {
+  color: var(--color-accent-soft);
+  border-color: var(--color-border);
+}
+
+:where(button, a, textarea, input, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .primary-cta:hover,
+  .cinema-action:hover {
+    transform: none;
+  }
+}
