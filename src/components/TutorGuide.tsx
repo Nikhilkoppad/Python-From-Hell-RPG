@@ -1,6 +1,6 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {AnimatePresence,motion,useReducedMotion} from 'motion/react';
-import {Brain,ChevronLeft,ChevronRight,MessageCircle,Mic,MicOff,Play,Send,Sparkles,Zap} from 'lucide-react';
+import {Brain,ChevronRight,MessageCircle,Mic,MicOff,Play,Send,Sparkles,Zap} from 'lucide-react';
 import type {Lesson} from '../domain/lessons';
 import type {AttemptStats,RoastIntensity} from '../types/progress';
 import {askMentor,createOllamaProvider,type MentorMode,MentorChatTurn} from '../ai/mentor';
@@ -99,7 +99,7 @@ export function TutorGuide({lesson,stats,output,message,userCode,sound,roastInte
 
   useEffect(()=>{setStage('story');setAnswer(null);setTeachStep(0);setInput('');setChats([]);setDisturbance(0);lastMessage.current=''},[lesson.id]);
   useEffect(()=>{if(completed)setStage('mastered');else if(stats?.lastOutcome)setStage('retry')},[completed,stats?.lastOutcome]);
-  useEffect(()=>{const timer=window.setInterval(()=>setDisturbance(v=>v+1),7200);return()=>window.clearInterval(timer)},[]);
+  useEffect(()=>{const timer=window.setInterval(()=>setDisturbance(v=>{if(sound)playSfx('enter');return v+1}),7200);return()=>window.clearInterval(timer)},[sound]);
   useEffect(()=>{
     if(message&&message!==lastMessage.current){
       lastMessage.current=message;
@@ -144,7 +144,7 @@ export function TutorGuide({lesson,stats,output,message,userCode,sound,roastInte
           <motion.div key={`${stage}-${teachStep}`} className="teacher-speech" initial={reduced?{opacity:0}:{opacity:0,y:12}} animate={{opacity:1,y:0}} exit={reduced?{opacity:0}:{opacity:0,y:-8}} transition={{duration:.28}}>
             <div className="speech-meta"><span>{stage==='story'?'OPENING SCENE':stage==='assess'?'DIAGNOSTIC':stage==='teach'?bites[teachStep].label:stage==='try'?'LIVE COACHING':stage==='retry'?'POST-MORTEM':'VICTORY'}</span><em>{meme}</em></div>
             <h2>{stage==='story'?'THE CRATER WAKES':stage==='assess'?'SHOW ME HOW YOUR BRAIN THINKS':stage==='teach'?bites[teachStep].title:stage==='try'?'YOUR TURN, HERETIC':stage==='retry'?'THAT CODE JUST DIED':'CONCEPT INSTALLED'}</h2>
-            <p>{stage==='story'?STORY[lesson.layer]:stage==='assess'?'I am not grading you. I am measuring the exact size of the hole in your knowledge so I can fill it properly.':stage==='teach'?bites[teachStep].body:stage==='try'?'Write the code yourself. Tell me what you expect before you press Run. When it fails, bring me the evidence.':stage==='retry'?`${roast(lesson.roast,roastIntensity)} ${message||'Change one small thing and run it again. I am not dumping the answer on you.'}':'You proved the behavior repeatedly. Next lesson unlocked. Try not to become emotionally attached to one correct answer.'}</p>
+            <p>{stage==='story'?STORY[lesson.layer]:stage==='assess'?'I am not grading you. I am measuring the exact size of the hole in your knowledge so I can fill it properly.':stage==='teach'?bites[teachStep].body:stage==='try'?'Write the code yourself. Tell me what you expect before you press Run. When it fails, bring me the evidence.':stage==='retry'?`${roast(lesson.roast,roastIntensity)} ${message||'Change one small thing and run it again. I am not dumping the answer on you.'}`:'You proved the behavior repeatedly. Next lesson unlocked. Try not to become emotionally attached to one correct answer.'}</p>
             {stage==='teach'&&teachStep===1&&<div className="teacher-example"><span>THE TINY SPELL</span><pre>{lesson.starterCode}</pre></div>}
             {stage==='retry'&&<div className="teacher-repair"><span>RECOVERY PLAN</span><b>1. Read the error → 2. Explain the mistake → 3. Change one thing → 4. Run again.</b></div>}
           </motion.div>
