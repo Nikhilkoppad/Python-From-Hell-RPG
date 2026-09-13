@@ -10,8 +10,8 @@ A story-driven Python learning RPG, browser coding IDE, debugging dungeon, boss 
 - Tutor-first lesson flow: STORY → ASSESS → TEACH → TRY → ROAST/EXPLAIN → RETRY → MASTER
 - PYTHONSURA JARVIS-style tutor panel with progressive hints, memes/emojis, playful profanity, and four mentor modes
 - Every lesson begins with a short story/diagnostic and requires repeated successful behavior checks before mastery unlocks the next lesson
-- Live tutor chat is built into the lesson workspace and receives the learner's code, runtime output, mastery and mistake context
-- Built-in local Ollama mentor path defaults to `http://localhost:11434/api` with `gemma4:latest`, while keeping a deterministic fallback when Ollama is unavailable
+- Live tutor chat is built into the lesson workspace and keeps conversation history while sending the learner's code, runtime output, mastery and mistake context to the mentor
+- Built-in local Ollama mentor path defaults to `http://127.0.0.1:11434/api` with `gemma4:latest`, while keeping a deterministic fallback when Ollama is unavailable
 - Browser Python execution in a Web Worker using Pyodide, with a warm worker between sequential runs and automatic teardown on timeout/cancellation
 - Execution errors, stderr/stdout capture, timeout protection, cancellation, and worker isolation
 - Lesson challenges with required concepts and client-side private behavior harnesses
@@ -43,7 +43,7 @@ The browser execution layer uses Pyodide 314.0.6 and therefore runs CPython 3.14
 
 ## AI mentor
 
-PYTHONSURA first tries the built-in local Ollama API at `http://localhost:11434/api/chat` using `gemma4:latest`. Ollama's local API requires no authentication, and local browser origins can be allowed through its CORS configuration. An optional `VITE_MENTOR_ENDPOINT` + `VITE_MENTOR_MODEL` can still override this with an OpenAI-compatible provider. When every provider is unavailable, PYTHONSURA falls back to deterministic local guidance so the lesson loop stays usable. 
+PYTHONSURA first tries the built-in local Ollama API at `http://127.0.0.1:11434/api/chat` using `gemma4:latest`. The tutor sends the ongoing conversation history plus the current code/error context so replies can be conversational instead of stateless. A deterministic local fallback remains available whenever Ollama is offline. An optional `VITE_MENTOR_ENDPOINT` + `VITE_MENTOR_MODEL` can override the built-in local provider with an OpenAI-compatible service.
 
 ## Architecture
 
