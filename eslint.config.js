@@ -24,9 +24,13 @@ export default tseslint.config(
       'react-hooks': reactHooks,
     },
     rules: {
+      'no-empty': ['error', { allowEmptyCatch: true }],
+      'no-useless-escape': 'warn',
+      'no-undef': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': 'error',
     },
   },
 );
