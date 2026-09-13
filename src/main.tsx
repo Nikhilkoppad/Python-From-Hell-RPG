@@ -8,6 +8,5 @@ import './interview-polish.css';
 import './tutor.css';
 import AppFinal from './AppFinal';
 import {ErrorBoundary} from './components/ErrorBoundary';
-import {CosmeticHud} from './components/CosmeticHud';
 
-createRoot(document.getElementById('root')!).render(<StrictMode><ErrorBoundary><AppFinal/><CosmeticHud/></ErrorBoundary></StrictMode>);
+createRoot(document.getElementById('root')!).render(<StrictMode><ErrorBoundary><AppFinal/></ErrorBoundary></StrictMode>);
