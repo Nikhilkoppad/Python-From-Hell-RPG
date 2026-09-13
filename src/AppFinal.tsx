@@ -5,7 +5,7 @@ import {lessonCatalog} from './domain/lessons';
 import {debuggingCases} from './domain/debugging';
 import {bosses,type BossPhase} from './domain/bosses';
 import {nextStoryEvent} from './domain/story';
-import {createInitialProgress,loadProgress,saveProgress,claimCodingReward,claimDebugReward,claimBossReward,setBossPhase,claimInterviewReward} from './engine/progress';
+import {createInitialProgress,loadProgress,saveProgress,claimCodingReward,claimDebugReward,claimBossReward,setBossPhase} from './engine/progress';
 import {evaluateBossPhase} from './engine/bossRunner';
 import {levelFromXp,xpToNext,XP_REWARDS} from './engine/xp';
 import {unlockedLayerCount} from './engine/unlocks';
