@@ -1,8 +1,66 @@
-export type CpythonLesson={id:string;title:string;version:'3.13';scope:'language'|'cpython';experimental?:boolean;brief:string;keyPoints:string[];code:string};
+export type CpythonLesson = {
+  id: string;
+  title: string;
+  version: '3.13';
+  scope: 'language' | 'cpython';
+  experimental?: boolean;
+  brief: string;
+  keyPoints: string[];
+  code: string;
+};
 
-export const cpythonLessons:CpythonLesson[]=[
-{id:'cp-bytecode',title:'BYTECODE: THE DISASSEMBLED SPELL',version:'3.13',scope:'cpython',brief:'Use dis to inspect the bytecode representation associated with a Python function.',keyPoints:['Bytecode is an implementation detail of CPython, not the Python language specification.','Use the dis module to inspect bytecode instead of treating opcode names as permanent API.'],code:'import dis\n\ndef add(a, b):\n    return a + b\n\ndis.dis(add)'},
-{id:'cp-free-threading',title:'FREE-THREADING: THE GIL IS OPTIONAL',version:'3.13',scope:'cpython',experimental:true,brief:'Understand the experimental free-threaded build introduced in CPython 3.13.',keyPoints:['CPython 3.13 introduced an experimental free-threaded build that disables the GIL.','It requires a different build/configuration and is not enabled by default.','Extension compatibility matters; unsupported extensions can re-enable the GIL.'],code:'import sys\nprint(sys.version)\nprint("Check the build documentation before assuming free-threading is enabled.")'},
-{id:'cp-jit',title:'THE EXPERIMENTAL JIT',version:'3.13',scope:'cpython',experimental:true,brief:'Explore the experimental JIT pipeline without confusing it with normal Python execution.',keyPoints:['CPython 3.13 can be built with --enable-experimental-jit.','The build can expose a Tier 2 interpreter and JIT pipeline.','Availability depends on how CPython was built; do not assume the JIT is active.'],code:'import sys\nprint(sys.version)\nprint("JIT availability is a build/runtime property, not a language guarantee.")'},
-{id:'cp-pyobject',title:'PYOBJECT: THE IMPLEMENTATION LAYER',version:'3.13',scope:'cpython',brief:'Separate object model concepts from the language-level meaning of objects.',keyPoints:['CPython represents objects with implementation-level structures such as PyObject.','Reference counting and object layout are CPython implementation details and can change.'],code:'value = []\nprint(type(value))\nprint(id(value))\nprint("The language does not promise a particular memory layout.")'},
+export const cpythonLessons: CpythonLesson[] = [
+  {
+    id: 'cp-bytecode',
+    title: 'BYTECODE: THE DISASSEMBLED SPELL',
+    version: '3.13',
+    scope: 'cpython',
+    brief: 'Use dis to inspect the bytecode representation associated with a Python function.',
+    keyPoints: [
+      'Bytecode is an implementation detail of CPython, not the Python language specification.',
+      'Use the dis module to inspect bytecode instead of treating opcode names as permanent API.',
+    ],
+    code: 'import dis\n\ndef add(a, b):\n    return a + b\n\ndis.dis(add)',
+  },
+  {
+    id: 'cp-free-threading',
+    title: 'FREE-THREADING: THE GIL IS OPTIONAL',
+    version: '3.13',
+    scope: 'cpython',
+    experimental: true,
+    brief: 'Understand the experimental free-threaded build introduced in CPython 3.13.',
+    keyPoints: [
+      'CPython 3.13 introduced an experimental free-threaded build that disables the GIL.',
+      'It requires a different build/configuration and is not enabled by default.',
+      'Extension compatibility matters; unsupported extensions can re-enable the GIL.',
+    ],
+    code: 'import sys\nprint(sys.version)\nprint("Check the build documentation before assuming free-threading is enabled.")',
+  },
+  {
+    id: 'cp-jit',
+    title: 'THE EXPERIMENTAL JIT',
+    version: '3.13',
+    scope: 'cpython',
+    experimental: true,
+    brief:
+      'Explore the experimental JIT pipeline without confusing it with normal Python execution.',
+    keyPoints: [
+      'CPython 3.13 can be built with --enable-experimental-jit.',
+      'The build can expose a Tier 2 interpreter and JIT pipeline.',
+      'Availability depends on how CPython was built; do not assume the JIT is active.',
+    ],
+    code: 'import sys\nprint(sys.version)\nprint("JIT availability is a build/runtime property, not a language guarantee.")',
+  },
+  {
+    id: 'cp-pyobject',
+    title: 'PYOBJECT: THE IMPLEMENTATION LAYER',
+    version: '3.13',
+    scope: 'cpython',
+    brief: 'Separate object model concepts from the language-level meaning of objects.',
+    keyPoints: [
+      'CPython represents objects with implementation-level structures such as PyObject.',
+      'Reference counting and object layout are CPython implementation details and can change.',
+    ],
+    code: 'value = []\nprint(type(value))\nprint(id(value))\nprint("The language does not promise a particular memory layout.")',
+  },
 ];

@@ -1,4 +1,9 @@
-import { recordAttempt, type AttemptOutcome, type AdaptiveSignal, type MasteryRecord } from './adaptive';
+import {
+  recordAttempt,
+  type AttemptOutcome,
+  type AdaptiveSignal,
+  type MasteryRecord,
+} from './adaptive';
 import { XP_REWARDS } from './xp';
 
 export type LessonRunInput = {
@@ -18,7 +23,13 @@ export function processLessonAttempt(
   mastery: Record<string, MasteryRecord>,
   input: LessonRunInput,
 ): LessonFlowResult {
-  const tracked = recordAttempt(mastery, input.lessonId, input.outcome, input.elapsedMs, input.hintUsed);
+  const tracked = recordAttempt(
+    mastery,
+    input.lessonId,
+    input.outcome,
+    input.elapsedMs,
+    input.hintUsed,
+  );
   let xpEarned = 0;
   if (input.outcome === 'success') {
     xpEarned += XP_REWARDS.challenge;

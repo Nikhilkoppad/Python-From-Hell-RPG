@@ -1,11 +1,268 @@
-export type ProjectMilestone={id:string;title:string;objective:string;acceptance:string[]};
-export type ProjectValidation={requiredPatterns?:RegExp[];harness:string;successMessage?:string};
-export type Project={id:string;tier:'beginner'|'intermediate'|'advanced';title:string;name:string;difficulty:'BEGINNER'|'INTERMEDIATE'|'ADVANCED';brief:string;firstTask:string;skills:string[];milestones:ProjectMilestone[];rewardXp:number;starterCode:string;validation:ProjectValidation};
-export const projects:Project[]=[
-{id:'calculator',tier:'beginner',title:'HELL CALCULATOR',name:'HELL CALCULATOR',difficulty:'BEGINNER',brief:'Build a CLI calculator with explicit validation and error handling.',firstTask:'Implement calculate(a, b, operator), then exercise it from the CLI.',skills:['input','type conversion','conditions','functions'],milestones:[{id:'c1',title:'Parse input',objective:'Accept two numbers and an operator.',acceptance:['supports + - * /']},{id:'c2',title:'Handle failure',objective:'Reject invalid operators and division by zero.',acceptance:['clear error message','program remains usable']},{id:'c3',title:'Extract logic',objective:'Move calculation into a reusable function.',acceptance:['function returns the result']}],rewardXp:150,starterCode:'def calculate(a, b, operator):\n    if operator == "+":\n        return a + b\n    if operator == "-":\n        return a - b\n    if operator == "*":\n        return a * b\n    if operator == "/":\n        if b == 0:\n            raise ZeroDivisionError("division by zero")\n        return a / b\n    raise ValueError("unsupported operator")\n\nprint(calculate(8, 2, "/"))',validation:{requiredPatterns:[/def\s+calculate\s*\(/,/raise\s+ValueError/,/operator/],harness:'assert _ns["calculate"](2, 3, "+") == 5\nassert _ns["calculate"](7, 4, "-") == 3\nassert _ns["calculate"](6, 3, "*") == 18\nassert _ns["calculate"](8, 2, "/") == 4\ntry:\n    _ns["calculate"](1, 0, "/")\nexcept ZeroDivisionError:\n    pass\nelse:\n    raise AssertionError("division by zero must fail")\ntry:\n    _ns["calculate"](1, 2, "%")\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError("unknown operators must fail")',successMessage:'Calculator contract passed: arithmetic, validation, and failure handling all work.'}},
-{id:'quiz',tier:'beginner',title:'INFERNAL QUIZ',name:'INFERNAL QUIZ',difficulty:'BEGINNER',brief:'Create a quiz engine with scoring, validation and replay.',firstTask:'Implement score_answer(answer, expected) before building the question loop.',skills:['lists','dicts','loops','functions'],milestones:[{id:'q1',title:'Question model',objective:'Represent questions and answers consistently.',acceptance:['multiple questions work']},{id:'q2',title:'Score answers',objective:'Compare answers and update a score.',acceptance:['correct answers increment score']},{id:'q3',title:'Replay loop',objective:'Allow another round without restarting the program.',acceptance:['state resets correctly']}],rewardXp:150,starterCode:'def score_answer(answer, expected):\n    return answer.strip().lower() == expected.strip().lower()\n\nquestions = [{"prompt": "2 + 2?", "answer": "4"}]\nscore = sum(score_answer("4", q["answer"]) for q in questions)\nprint(score)',validation:{requiredPatterns:[/def\s+score_answer\s*\(/,/strip\s*\(\s*\)/,/lower\s*\(\s*\)/],harness:'assert _ns["score_answer"]("Python", "python") is True\nassert _ns["score_answer"]("  yes ", "YES") is True\nassert _ns["score_answer"]("no", "yes") is False',successMessage:'Quiz contract passed: normalized answers score deterministically.'}},
-{id:'expense-tracker',tier:'intermediate',title:'SOUL EXPENSE TRACKER',name:'SOUL EXPENSE TRACKER',difficulty:'INTERMEDIATE',brief:'Model expenses, summarize categories, and detect malformed entries.',firstTask:'Implement total_by_category(expenses) for validated record dictionaries.',skills:['collections','functions','validation','data processing'],milestones:[{id:'e1',title:'Model records',objective:'Represent one expense consistently.',acceptance:['amount and category are available']},{id:'e2',title:'Aggregate',objective:'Compute totals by category.',acceptance:['missing categories do not crash the report']},{id:'e3',title:'Validate',objective:'Reject malformed expense data.',acceptance:['errors identify the bad field']}],rewardXp:150,starterCode:'def total_by_category(expenses):\n    totals = {}\n    for expense in expenses:\n        category = expense["category"]\n        amount = float(expense["amount"])\n        totals[category] = totals.get(category, 0.0) + amount\n    return totals\n\nprint(total_by_category([{"category":"food","amount":12.5},{"category":"food","amount":7.5},{"category":"travel","amount":20}]))',validation:{requiredPatterns:[/def\s+total_by_category\s*\(/,/totals\s*=\s*\{\}/,/float\s*\(/],harness:'sample=[{"category":"food","amount":12.5},{"category":"food","amount":7.5},{"category":"travel","amount":20}]\nassert _ns["total_by_category"](sample) == {"food":20.0,"travel":20.0}\nassert _ns["total_by_category"]([]) == {}',successMessage:'Expense contract passed: category aggregation is deterministic.'}},
-{id:'log-analyzer',tier:'intermediate',title:'LOG ABYSS ANALYZER',name:'LOG ABYSS ANALYZER',difficulty:'INTERMEDIATE',brief:'Parse log lines and summarize recurring error classes.',firstTask:'Implement summarize_logs(lines) with a stable count per log level.',skills:['strings','dicts','exceptions','data processing'],milestones:[{id:'l1',title:'Parse records',objective:'Extract level and message from input lines.',acceptance:['well-formed lines parse deterministically']},{id:'l2',title:'Aggregate',objective:'Count events by level.',acceptance:['counts are stable']},{id:'l3',title:'Report',objective:'Produce a concise summary.',acceptance:['unknown lines are reported clearly']}],rewardXp:150,starterCode:'def summarize_logs(lines):\n    counts = {}\n    for line in lines:\n        parts = line.split(" ", 2)\n        if len(parts) < 2:\n            continue\n        level = parts[1].upper()\n        counts[level] = counts.get(level, 0) + 1\n    return counts\n\nprint(summarize_logs(["10 INFO boot","11 ERROR disk","12 ERROR retry"]))',validation:{requiredPatterns:[/def\s+summarize_logs\s*\(/,/\.split\s*\(/,/counts\.get\s*\(/],harness:'lines=["10 INFO boot","11 ERROR disk","12 ERROR retry","13 INFO ready"]\nassert _ns["summarize_logs"](lines) == {"INFO":2,"ERROR":2}\nassert _ns["summarize_logs"](["malformed"]) == {}',successMessage:'Log contract passed: levels are parsed and aggregated consistently.'}},
-{id:'traceback-forensics',tier:'advanced',title:'TRACEBACK FORENSICS',name:'TRACEBACK FORENSICS',difficulty:'ADVANCED',brief:'Build a debugging utility that captures failures and groups them by exception type.',firstTask:'Implement classify_failure(fn) without suppressing the original exception context.',skills:['exceptions','tracebacks','logging','analysis'],milestones:[{id:'t1',title:'Capture failure',objective:'Record exception type and message.',acceptance:['exception details are preserved']},{id:'t2',title:'Summarize',objective:'Group failures by exception type.',acceptance:['counts are deterministic']},{id:'t3',title:'Explain',objective:'Produce remediation hints for known error classes.',acceptance:['unknown errors remain clearly unknown']}],rewardXp:150,starterCode:'def classify_failure(fn):\n    try:\n        fn()\n    except Exception as exc:\n        return type(exc).__name__\n    return "OK"\n\nprint(classify_failure(lambda: 1 / 0))',validation:{requiredPatterns:[/def\s+classify_failure\s*\(/,/except\s+Exception\s+as\s+exc/,/type\s*\(\s*exc\s*\)/],harness:'assert _ns["classify_failure"](lambda: 1 / 0) == "ZeroDivisionError"\nassert _ns["classify_failure"](lambda: int("x")) == "ValueError"\nassert _ns["classify_failure"](lambda: 42) == "OK"',successMessage:'Forensics contract passed: failures are classified without guessing from text.'}},
-{id:'runtime-inspector',tier:'advanced',title:'RUNTIME INSPECTOR',name:'RUNTIME INSPECTOR',difficulty:'ADVANCED',brief:'Explore bytecode and code-object metadata for a target CPython runtime.',firstTask:'Implement inspect_function(fn) and report stable code-object metadata.',skills:['dis','code objects','introspection','version labelling'],milestones:[{id:'r1',title:'Inspect code',objective:'Compile a small function and inspect its code object.',acceptance:['co_filename and co_name are shown']},{id:'r2',title:'Disassemble',objective:'Use dis without assuming opcode stability.',acceptance:['instructions are displayed']},{id:'r3',title:'Explain',objective:'Label observations as CPython-specific and version-sensitive.',acceptance:['claims include target version']}],rewardXp:150,starterCode:'def inspect_function(fn):\n    code = fn.__code__\n    return {"name": code.co_name, "filename": code.co_filename}\n\ndef target():\n    return 42\n\nprint(inspect_function(target)["name"])',validation:{requiredPatterns:[/def\s+inspect_function\s*\(/,/__code__/,/co_name/],harness:'def target():\n    return 42\ninfo=_ns["inspect_function"](target)\nassert info["name"] == "target"\nassert isinstance(info["filename"], str) and info["filename"]',successMessage:'Runtime contract passed: code-object metadata is exposed without opcode assumptions.'}},
+export type ProjectMilestone = {
+  id: string;
+  title: string;
+  objective: string;
+  acceptance: string[];
+};
+export type ProjectValidation = {
+  requiredPatterns?: RegExp[];
+  harness: string;
+  successMessage?: string;
+};
+export type Project = {
+  id: string;
+  tier: 'beginner' | 'intermediate' | 'advanced';
+  title: string;
+  name: string;
+  difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  brief: string;
+  firstTask: string;
+  skills: string[];
+  milestones: ProjectMilestone[];
+  rewardXp: number;
+  starterCode: string;
+  validation: ProjectValidation;
+};
+export const projects: Project[] = [
+  {
+    id: 'calculator',
+    tier: 'beginner',
+    title: 'HELL CALCULATOR',
+    name: 'HELL CALCULATOR',
+    difficulty: 'BEGINNER',
+    brief: 'Build a CLI calculator with explicit validation and error handling.',
+    firstTask: 'Implement calculate(a, b, operator), then exercise it from the CLI.',
+    skills: ['input', 'type conversion', 'conditions', 'functions'],
+    milestones: [
+      {
+        id: 'c1',
+        title: 'Parse input',
+        objective: 'Accept two numbers and an operator.',
+        acceptance: ['supports + - * /'],
+      },
+      {
+        id: 'c2',
+        title: 'Handle failure',
+        objective: 'Reject invalid operators and division by zero.',
+        acceptance: ['clear error message', 'program remains usable'],
+      },
+      {
+        id: 'c3',
+        title: 'Extract logic',
+        objective: 'Move calculation into a reusable function.',
+        acceptance: ['function returns the result'],
+      },
+    ],
+    rewardXp: 150,
+    starterCode:
+      'def calculate(a, b, operator):\n    if operator == "+":\n        return a + b\n    if operator == "-":\n        return a - b\n    if operator == "*":\n        return a * b\n    if operator == "/":\n        if b == 0:\n            raise ZeroDivisionError("division by zero")\n        return a / b\n    raise ValueError("unsupported operator")\n\nprint(calculate(8, 2, "/"))',
+    validation: {
+      requiredPatterns: [/def\s+calculate\s*\(/, /raise\s+ValueError/, /operator/],
+      harness:
+        'assert _ns["calculate"](2, 3, "+") == 5\nassert _ns["calculate"](7, 4, "-") == 3\nassert _ns["calculate"](6, 3, "*") == 18\nassert _ns["calculate"](8, 2, "/") == 4\ntry:\n    _ns["calculate"](1, 0, "/")\nexcept ZeroDivisionError:\n    pass\nelse:\n    raise AssertionError("division by zero must fail")\ntry:\n    _ns["calculate"](1, 2, "%")\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError("unknown operators must fail")',
+      successMessage:
+        'Calculator contract passed: arithmetic, validation, and failure handling all work.',
+    },
+  },
+  {
+    id: 'quiz',
+    tier: 'beginner',
+    title: 'INFERNAL QUIZ',
+    name: 'INFERNAL QUIZ',
+    difficulty: 'BEGINNER',
+    brief: 'Create a quiz engine with scoring, validation and replay.',
+    firstTask: 'Implement score_answer(answer, expected) before building the question loop.',
+    skills: ['lists', 'dicts', 'loops', 'functions'],
+    milestones: [
+      {
+        id: 'q1',
+        title: 'Question model',
+        objective: 'Represent questions and answers consistently.',
+        acceptance: ['multiple questions work'],
+      },
+      {
+        id: 'q2',
+        title: 'Score answers',
+        objective: 'Compare answers and update a score.',
+        acceptance: ['correct answers increment score'],
+      },
+      {
+        id: 'q3',
+        title: 'Replay loop',
+        objective: 'Allow another round without restarting the program.',
+        acceptance: ['state resets correctly'],
+      },
+    ],
+    rewardXp: 150,
+    starterCode:
+      'def score_answer(answer, expected):\n    return answer.strip().lower() == expected.strip().lower()\n\nquestions = [{"prompt": "2 + 2?", "answer": "4"}]\nscore = sum(score_answer("4", q["answer"]) for q in questions)\nprint(score)',
+    validation: {
+      requiredPatterns: [/def\s+score_answer\s*\(/, /strip\s*\(\s*\)/, /lower\s*\(\s*\)/],
+      harness:
+        'assert _ns["score_answer"]("Python", "python") is True\nassert _ns["score_answer"]("  yes ", "YES") is True\nassert _ns["score_answer"]("no", "yes") is False',
+      successMessage: 'Quiz contract passed: normalized answers score deterministically.',
+    },
+  },
+  {
+    id: 'expense-tracker',
+    tier: 'intermediate',
+    title: 'SOUL EXPENSE TRACKER',
+    name: 'SOUL EXPENSE TRACKER',
+    difficulty: 'INTERMEDIATE',
+    brief: 'Model expenses, summarize categories, and detect malformed entries.',
+    firstTask: 'Implement total_by_category(expenses) for validated record dictionaries.',
+    skills: ['collections', 'functions', 'validation', 'data processing'],
+    milestones: [
+      {
+        id: 'e1',
+        title: 'Model records',
+        objective: 'Represent one expense consistently.',
+        acceptance: ['amount and category are available'],
+      },
+      {
+        id: 'e2',
+        title: 'Aggregate',
+        objective: 'Compute totals by category.',
+        acceptance: ['missing categories do not crash the report'],
+      },
+      {
+        id: 'e3',
+        title: 'Validate',
+        objective: 'Reject malformed expense data.',
+        acceptance: ['errors identify the bad field'],
+      },
+    ],
+    rewardXp: 150,
+    starterCode:
+      'def total_by_category(expenses):\n    totals = {}\n    for expense in expenses:\n        category = expense["category"]\n        amount = float(expense["amount"])\n        totals[category] = totals.get(category, 0.0) + amount\n    return totals\n\nprint(total_by_category([{"category":"food","amount":12.5},{"category":"food","amount":7.5},{"category":"travel","amount":20}]))',
+    validation: {
+      requiredPatterns: [/def\s+total_by_category\s*\(/, /totals\s*=\s*\{\}/, /float\s*\(/],
+      harness:
+        'sample=[{"category":"food","amount":12.5},{"category":"food","amount":7.5},{"category":"travel","amount":20}]\nassert _ns["total_by_category"](sample) == {"food":20.0,"travel":20.0}\nassert _ns["total_by_category"]([]) == {}',
+      successMessage: 'Expense contract passed: category aggregation is deterministic.',
+    },
+  },
+  {
+    id: 'log-analyzer',
+    tier: 'intermediate',
+    title: 'LOG ABYSS ANALYZER',
+    name: 'LOG ABYSS ANALYZER',
+    difficulty: 'INTERMEDIATE',
+    brief: 'Parse log lines and summarize recurring error classes.',
+    firstTask: 'Implement summarize_logs(lines) with a stable count per log level.',
+    skills: ['strings', 'dicts', 'exceptions', 'data processing'],
+    milestones: [
+      {
+        id: 'l1',
+        title: 'Parse records',
+        objective: 'Extract level and message from input lines.',
+        acceptance: ['well-formed lines parse deterministically'],
+      },
+      {
+        id: 'l2',
+        title: 'Aggregate',
+        objective: 'Count events by level.',
+        acceptance: ['counts are stable'],
+      },
+      {
+        id: 'l3',
+        title: 'Report',
+        objective: 'Produce a concise summary.',
+        acceptance: ['unknown lines are reported clearly'],
+      },
+    ],
+    rewardXp: 150,
+    starterCode:
+      'def summarize_logs(lines):\n    counts = {}\n    for line in lines:\n        parts = line.split(" ", 2)\n        if len(parts) < 2:\n            continue\n        level = parts[1].upper()\n        counts[level] = counts.get(level, 0) + 1\n    return counts\n\nprint(summarize_logs(["10 INFO boot","11 ERROR disk","12 ERROR retry"]))',
+    validation: {
+      requiredPatterns: [/def\s+summarize_logs\s*\(/, /\.split\s*\(/, /counts\.get\s*\(/],
+      harness:
+        'lines=["10 INFO boot","11 ERROR disk","12 ERROR retry","13 INFO ready"]\nassert _ns["summarize_logs"](lines) == {"INFO":2,"ERROR":2}\nassert _ns["summarize_logs"](["malformed"]) == {}',
+      successMessage: 'Log contract passed: levels are parsed and aggregated consistently.',
+    },
+  },
+  {
+    id: 'traceback-forensics',
+    tier: 'advanced',
+    title: 'TRACEBACK FORENSICS',
+    name: 'TRACEBACK FORENSICS',
+    difficulty: 'ADVANCED',
+    brief: 'Build a debugging utility that captures failures and groups them by exception type.',
+    firstTask: 'Implement classify_failure(fn) without suppressing the original exception context.',
+    skills: ['exceptions', 'tracebacks', 'logging', 'analysis'],
+    milestones: [
+      {
+        id: 't1',
+        title: 'Capture failure',
+        objective: 'Record exception type and message.',
+        acceptance: ['exception details are preserved'],
+      },
+      {
+        id: 't2',
+        title: 'Summarize',
+        objective: 'Group failures by exception type.',
+        acceptance: ['counts are deterministic'],
+      },
+      {
+        id: 't3',
+        title: 'Explain',
+        objective: 'Produce remediation hints for known error classes.',
+        acceptance: ['unknown errors remain clearly unknown'],
+      },
+    ],
+    rewardXp: 150,
+    starterCode:
+      'def classify_failure(fn):\n    try:\n        fn()\n    except Exception as exc:\n        return type(exc).__name__\n    return "OK"\n\nprint(classify_failure(lambda: 1 / 0))',
+    validation: {
+      requiredPatterns: [
+        /def\s+classify_failure\s*\(/,
+        /except\s+Exception\s+as\s+exc/,
+        /type\s*\(\s*exc\s*\)/,
+      ],
+      harness:
+        'assert _ns["classify_failure"](lambda: 1 / 0) == "ZeroDivisionError"\nassert _ns["classify_failure"](lambda: int("x")) == "ValueError"\nassert _ns["classify_failure"](lambda: 42) == "OK"',
+      successMessage:
+        'Forensics contract passed: failures are classified without guessing from text.',
+    },
+  },
+  {
+    id: 'runtime-inspector',
+    tier: 'advanced',
+    title: 'RUNTIME INSPECTOR',
+    name: 'RUNTIME INSPECTOR',
+    difficulty: 'ADVANCED',
+    brief: 'Explore bytecode and code-object metadata for a target CPython runtime.',
+    firstTask: 'Implement inspect_function(fn) and report stable code-object metadata.',
+    skills: ['dis', 'code objects', 'introspection', 'version labelling'],
+    milestones: [
+      {
+        id: 'r1',
+        title: 'Inspect code',
+        objective: 'Compile a small function and inspect its code object.',
+        acceptance: ['co_filename and co_name are shown'],
+      },
+      {
+        id: 'r2',
+        title: 'Disassemble',
+        objective: 'Use dis without assuming opcode stability.',
+        acceptance: ['instructions are displayed'],
+      },
+      {
+        id: 'r3',
+        title: 'Explain',
+        objective: 'Label observations as CPython-specific and version-sensitive.',
+        acceptance: ['claims include target version'],
+      },
+    ],
+    rewardXp: 150,
+    starterCode:
+      'def inspect_function(fn):\n    code = fn.__code__\n    return {"name": code.co_name, "filename": code.co_filename}\n\ndef target():\n    return 42\n\nprint(inspect_function(target)["name"])',
+    validation: {
+      requiredPatterns: [/def\s+inspect_function\s*\(/, /__code__/, /co_name/],
+      harness:
+        'def target():\n    return 42\ninfo=_ns["inspect_function"](target)\nassert info["name"] == "target"\nassert isinstance(info["filename"], str) and info["filename"]',
+      successMessage:
+        'Runtime contract passed: code-object metadata is exposed without opcode assumptions.',
+    },
+  },
 ];

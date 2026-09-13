@@ -1,1 +1,68 @@
-.save-transfer{margin-top:18px;padding:16px;border:1px solid #2b252a;background:#0b090d}.save-transfer-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.save-transfer-head h3{margin:5px 0;font-size:20px;color:#e7dfe2}.save-transfer-head p{margin:4px 0 0;max-width:430px;color:#71676d;font-size:11px;line-height:1.45}.save-transfer-head>svg{color:#ff6a4c;flex:0 0 auto;margin-top:2px}.save-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:18px}.save-tools button{display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #332b31;background:#120f12;color:#bdb1b7;padding:10px 12px;font:9px 'JetBrains Mono',monospace}.save-tools button:hover{border-color:#ff5735;color:#f3eee9}.settings-message{margin:10px 0 0;color:#ff8a6c;font:9px 'JetBrains Mono',monospace;line-height:1.5}@media(max-width:520px){.save-tools{grid-template-columns:1fr}.settings-panel h2{font-size:32px}}
+.save-transfer {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #2b252a;
+  background: #0b090d;
+}
+.save-transfer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+.save-transfer-head h3 {
+  margin: 5px 0;
+  font-size: 20px;
+  color: #e7dfe2;
+}
+.save-transfer-head p {
+  margin: 4px 0 0;
+  max-width: 430px;
+  color: #71676d;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.save-transfer-head > svg {
+  color: #ff6a4c;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+.save-tools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 18px;
+}
+.save-tools button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #332b31;
+  background: #120f12;
+  color: #bdb1b7;
+  padding: 10px 12px;
+  font:
+    9px 'JetBrains Mono',
+    monospace;
+}
+.save-tools button:hover {
+  border-color: #ff5735;
+  color: #f3eee9;
+}
+.settings-message {
+  margin: 10px 0 0;
+  color: #ff8a6c;
+  font:
+    9px 'JetBrains Mono',
+    monospace;
+  line-height: 1.5;
+}
+@media (max-width: 520px) {
+  .save-tools {
+    grid-template-columns: 1fr;
+  }
+  .settings-panel h2 {
+    font-size: 32px;
+  }
+}

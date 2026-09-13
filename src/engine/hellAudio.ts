@@ -1,24 +1,229 @@
-type CtxWithWebkit=Window & typeof globalThis & {webkitAudioContext?:typeof AudioContext};
+type CtxWithWebkit = Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext };
 
-export class HellAudio{
- private ctx?:AudioContext;private master?:GainNode;private ambientTimer?:number;
- private ambience?:{drone:OscillatorNode;wind:AudioBufferSourceNode};
- private ensure(){if(this.ctx&&this.ctx.state!=='closed')return this.ctx;const Ctx=window.AudioContext??(window as CtxWithWebkit).webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();const master=ctx.createGain();master.gain.value=.17;master.connect(ctx.destination);this.ctx=ctx;this.master=master;return ctx}
- private env(duration=.6,peak=.2){const ctx=this.ensure();if(!ctx||!this.master)return;const gain=ctx.createGain();gain.gain.setValueAtTime(.0001,ctx.currentTime);gain.gain.exponentialRampToValueAtTime(peak,ctx.currentTime+.02);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+duration);gain.connect(this.master);return gain}
- startAmbience(){const ctx=this.ensure();if(!ctx||!this.master||this.ambience)return;void ctx.resume();const drone=ctx.createOscillator();drone.type='sine';drone.frequency.value=36;const dg=ctx.createGain();dg.gain.value=.055;drone.connect(dg).connect(this.master);drone.start();const buffer=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.18;const wind=ctx.createBufferSource();wind.buffer=buffer;wind.loop=true;const filter=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=460;const wg=ctx.createGain();wg.gain.value=.013;wind.connect(filter).connect(wg).connect(this.master);wind.start();this.ambience={drone,wind};this.scheduleAtmosphere()}
- private scheduleAtmosphere(){if(this.ambientTimer)window.clearTimeout(this.ambientTimer);const tick=()=>{if(!this.ctx||!this.ambience)return;const choice=Math.floor(Math.random()*4);if(choice===0)this.noise(.16,.035,520);else if(choice===1)this.chain();else if(choice===2)this.fireCrackle();else this.noise(.9,.018,180);this.ambientTimer=window.setTimeout(tick,3800+Math.random()*5200)};this.ambientTimer=window.setTimeout(tick,2800)}
- setMuted(muted:boolean){if(this.master)this.master.gain.value=muted?0:.17}
- rumble(){const ctx=this.ensure();const gain=this.env(.95,.28);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='sine';o.frequency.setValueAtTime(50,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(22,ctx.currentTime+.9);o.connect(gain);o.start();o.stop(ctx.currentTime+1)}
- quake(){const ctx=this.ensure();const gain=this.env(.26,.3);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(120,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(28,ctx.currentTime+.2);o.connect(gain);o.start();o.stop(ctx.currentTime+.27);this.noise(.18,.16,720)}
- roar(){const ctx=this.ensure();const gain=this.env(1.45,.22);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(92,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(35,ctx.currentTime+1.25);const f=ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=390;o.connect(f).connect(gain);o.start();o.stop(ctx.currentTime+1.5);this.noise(1.25,.14,820)}
- portal(){const ctx=this.ensure();const gain=this.env(1.2,.16);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='triangle';o.frequency.setValueAtTime(80,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(1080,ctx.currentTime+1.05);o.connect(gain);o.start();o.stop(ctx.currentTime+1.25);this.noise(1.0,.055,1500)}
- impact(){const ctx=this.ensure();const gain=this.env(.42,.3);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='square';o.frequency.setValueAtTime(170,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(38,ctx.currentTime+.36);o.connect(gain);o.start();o.stop(ctx.currentTime+.45);this.noise(.36,.22,880)}
- spark(){const ctx=this.ensure();const gain=this.env(.1,.07);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='square';o.frequency.value=1800;o.connect(gain);o.start();o.stop(ctx.currentTime+.08)}
- chain(){const ctx=this.ensure();const gain=this.env(.45,.045);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='triangle';o.frequency.value=620;o.connect(gain);o.start();o.stop(ctx.currentTime+.1);window.setTimeout(()=>{const g=this.env(.28,.028);if(!g)return;const x=ctx.createOscillator();x.type='triangle';x.frequency.value=390;x.connect(g);x.start();x.stop(ctx.currentTime+.07)},110)}
- footstep(){this.noise(.09,.06,210)}
- fireCrackle(){this.noise(.055,.045,1200);window.setTimeout(()=>this.noise(.07,.03,1700),Math.random()*120)}
- laugh(){const ctx=this.ensure();const gain=this.env(.7,.08);if(!ctx||!gain)return;const o=ctx.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(220,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(540,ctx.currentTime+.18);o.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+.45);o.connect(gain);o.start();o.stop(ctx.currentTime+.52)}
- private noise(duration:number,peak:number,frequency:number){const ctx=this.ensure();if(!ctx||!this.master)return;const buffer=ctx.createBuffer(1,Math.max(1,Math.floor(ctx.sampleRate*duration)),ctx.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(.8-(i/data.length)*.45);const src=ctx.createBufferSource();src.buffer=buffer;const filter=ctx.createBiquadFilter();filter.type='bandpass';filter.frequency.value=frequency;const gain=ctx.createGain();gain.gain.value=peak;src.connect(filter).connect(gain).connect(this.master);src.start();src.stop(ctx.currentTime+duration+.03)}
- dispose(){if(this.ambientTimer)window.clearTimeout(this.ambientTimer);this.ambientTimer=undefined;try{this.ambience?.drone.stop();this.ambience?.wind.stop()}catch{};this.ambience=undefined;if(this.ctx){void this.ctx.close();this.ctx=undefined};this.master=undefined}
+export class HellAudio {
+  private ctx?: AudioContext;
+  private master?: GainNode;
+  private ambientTimer?: number;
+  private ambience?: { drone: OscillatorNode; wind: AudioBufferSourceNode };
+  private ensure() {
+    if (this.ctx && this.ctx.state !== 'closed') return this.ctx;
+    const Ctx = window.AudioContext ?? (window as CtxWithWebkit).webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const master = ctx.createGain();
+    master.gain.value = 0.17;
+    master.connect(ctx.destination);
+    this.ctx = ctx;
+    this.master = master;
+    return ctx;
+  }
+  private env(duration = 0.6, peak = 0.2) {
+    const ctx = this.ensure();
+    if (!ctx || !this.master) return;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(peak, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    gain.connect(this.master);
+    return gain;
+  }
+  startAmbience() {
+    const ctx = this.ensure();
+    if (!ctx || !this.master || this.ambience) return;
+    void ctx.resume();
+    const drone = ctx.createOscillator();
+    drone.type = 'sine';
+    drone.frequency.value = 36;
+    const dg = ctx.createGain();
+    dg.gain.value = 0.055;
+    drone.connect(dg).connect(this.master);
+    drone.start();
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.18;
+    const wind = ctx.createBufferSource();
+    wind.buffer = buffer;
+    wind.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 460;
+    const wg = ctx.createGain();
+    wg.gain.value = 0.013;
+    wind.connect(filter).connect(wg).connect(this.master);
+    wind.start();
+    this.ambience = { drone, wind };
+    this.scheduleAtmosphere();
+  }
+  private scheduleAtmosphere() {
+    if (this.ambientTimer) window.clearTimeout(this.ambientTimer);
+    const tick = () => {
+      if (!this.ctx || !this.ambience) return;
+      const choice = Math.floor(Math.random() * 4);
+      if (choice === 0) this.noise(0.16, 0.035, 520);
+      else if (choice === 1) this.chain();
+      else if (choice === 2) this.fireCrackle();
+      else this.noise(0.9, 0.018, 180);
+      this.ambientTimer = window.setTimeout(tick, 3800 + Math.random() * 5200);
+    };
+    this.ambientTimer = window.setTimeout(tick, 2800);
+  }
+  setMuted(muted: boolean) {
+    if (this.master) this.master.gain.value = muted ? 0 : 0.17;
+  }
+  rumble() {
+    const ctx = this.ensure();
+    const gain = this.env(0.95, 0.28);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(50, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(22, ctx.currentTime + 0.9);
+    o.connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 1);
+  }
+  quake() {
+    const ctx = this.ensure();
+    const gain = this.env(0.26, 0.3);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(120, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(28, ctx.currentTime + 0.2);
+    o.connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 0.27);
+    this.noise(0.18, 0.16, 720);
+  }
+  roar() {
+    const ctx = this.ensure();
+    const gain = this.env(1.45, 0.22);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(92, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(35, ctx.currentTime + 1.25);
+    const f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = 390;
+    o.connect(f).connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 1.5);
+    this.noise(1.25, 0.14, 820);
+  }
+  portal() {
+    const ctx = this.ensure();
+    const gain = this.env(1.2, 0.16);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(80, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1080, ctx.currentTime + 1.05);
+    o.connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 1.25);
+    this.noise(1.0, 0.055, 1500);
+  }
+  impact() {
+    const ctx = this.ensure();
+    const gain = this.env(0.42, 0.3);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'square';
+    o.frequency.setValueAtTime(170, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(38, ctx.currentTime + 0.36);
+    o.connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 0.45);
+    this.noise(0.36, 0.22, 880);
+  }
+  spark() {
+    const ctx = this.ensure();
+    const gain = this.env(0.1, 0.07);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'square';
+    o.frequency.value = 1800;
+    o.connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 0.08);
+  }
+  chain() {
+    const ctx = this.ensure();
+    const gain = this.env(0.45, 0.045);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.value = 620;
+    o.connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 0.1);
+    window.setTimeout(() => {
+      const g = this.env(0.28, 0.028);
+      if (!g) return;
+      const x = ctx.createOscillator();
+      x.type = 'triangle';
+      x.frequency.value = 390;
+      x.connect(g);
+      x.start();
+      x.stop(ctx.currentTime + 0.07);
+    }, 110);
+  }
+  footstep() {
+    this.noise(0.09, 0.06, 210);
+  }
+  fireCrackle() {
+    this.noise(0.055, 0.045, 1200);
+    window.setTimeout(() => this.noise(0.07, 0.03, 1700), Math.random() * 120);
+  }
+  laugh() {
+    const ctx = this.ensure();
+    const gain = this.env(0.7, 0.08);
+    if (!ctx || !gain) return;
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(220, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(540, ctx.currentTime + 0.18);
+    o.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.45);
+    o.connect(gain);
+    o.start();
+    o.stop(ctx.currentTime + 0.52);
+  }
+  private noise(duration: number, peak: number, frequency: number) {
+    const ctx = this.ensure();
+    if (!ctx || !this.master) return;
+    const buffer = ctx.createBuffer(
+      1,
+      Math.max(1, Math.floor(ctx.sampleRate * duration)),
+      ctx.sampleRate,
+    );
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++)
+      data[i] = (Math.random() * 2 - 1) * (0.8 - (i / data.length) * 0.45);
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = frequency;
+    const gain = ctx.createGain();
+    gain.gain.value = peak;
+    src.connect(filter).connect(gain).connect(this.master);
+    src.start();
+    src.stop(ctx.currentTime + duration + 0.03);
+  }
+  dispose() {
+    if (this.ambientTimer) window.clearTimeout(this.ambientTimer);
+    this.ambientTimer = undefined;
+    try {
+      this.ambience?.drone.stop();
+      this.ambience?.wind.stop();
+    } catch {}
+    this.ambience = undefined;
+    if (this.ctx) {
+      void this.ctx.close();
+      this.ctx = undefined;
+    }
+    this.master = undefined;
+  }
 }
-export const hellAudio=new HellAudio();
+export const hellAudio = new HellAudio();

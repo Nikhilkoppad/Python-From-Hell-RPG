@@ -42,15 +42,8 @@ function createPythosura(scale = 1): DemonRig {
   const skin = material(0x0d0a0f, 0.28, 0.68, 0x21050a, 0.22);
 
   for (let i = 0; i < 9; i += 1) {
-    const segment = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.62, 1.12, 6, 12),
-      skin,
-    );
-    segment.position.set(
-      Math.sin(i * 0.62) * 0.62,
-      1.22 + i * 0.5,
-      -2.45 - i * 0.42,
-    );
+    const segment = new THREE.Mesh(new THREE.CapsuleGeometry(0.62, 1.12, 6, 12), skin);
+    segment.position.set(Math.sin(i * 0.62) * 0.62, 1.22 + i * 0.5, -2.45 - i * 0.42);
     segment.rotation.x = Math.PI / 2;
     segment.rotation.z = -Math.sin(i * 0.7) * 0.08;
     body.add(segment);
@@ -61,28 +54,19 @@ function createPythosura(scale = 1): DemonRig {
   const head = new THREE.Group();
   head.position.set(0, 5.65, -6.25);
 
-  const skull = new THREE.Mesh(
-    new THREE.SphereGeometry(1.52, 32, 20),
-    skin,
-  );
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(1.52, 32, 20), skin);
   skull.scale.set(1.2, 1, 1.16);
   head.add(skull);
 
   const eyeMaterial = material(0xff432b, 0.1, 0.32, 0xff1c00, 7);
-  const eyeL = new THREE.Mesh(
-    new THREE.SphereGeometry(0.16, 16, 12),
-    eyeMaterial,
-  );
+  const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), eyeMaterial);
   eyeL.position.set(-0.6, 0.15, 1.4);
   const eyeR = eyeL.clone();
   eyeR.position.x = 0.6;
   head.add(eyeL, eyeR);
 
   const hornMaterial = material(0x32242a, 0.25, 0.55, 0x13050b, 0.2);
-  const hornL = new THREE.Mesh(
-    new THREE.ConeGeometry(0.33, 1.55, 12),
-    hornMaterial,
-  );
+  const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.33, 1.55, 12), hornMaterial);
   hornL.position.set(-1.02, 1.3, 0.04);
   hornL.rotation.z = -0.48;
   const hornR = hornL.clone();
@@ -92,28 +76,19 @@ function createPythosura(scale = 1): DemonRig {
 
   const upperJaw = new THREE.Group();
   upperJaw.position.set(0, -0.16, 1.04);
-  const upper = new THREE.Mesh(
-    new THREE.BoxGeometry(2.02, 0.48, 1.12),
-    skin,
-  );
+  const upper = new THREE.Mesh(new THREE.BoxGeometry(2.02, 0.48, 1.12), skin);
   upper.position.z = 0.12;
   upperJaw.add(upper);
 
   const lowerJaw = new THREE.Group();
   lowerJaw.position.set(0, -0.84, 0.98);
-  const lower = new THREE.Mesh(
-    new THREE.BoxGeometry(1.9, 0.4, 1.05),
-    skin,
-  );
+  const lower = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.4, 1.05), skin);
   lower.position.z = 0.12;
   lowerJaw.add(lower);
 
   const fangMaterial = material(0xd3c9c5, 0.05, 0.36, 0x2a1414, 0.1);
   for (const x of [-0.72, -0.36, 0, 0.36, 0.72]) {
-    const fang = new THREE.Mesh(
-      new THREE.ConeGeometry(0.09, 0.5, 8),
-      fangMaterial,
-    );
+    const fang = new THREE.Mesh(new THREE.ConeGeometry(0.09, 0.5, 8), fangMaterial);
     fang.position.set(x, -0.5, 1.02);
     fang.rotation.x = Math.PI;
     upperJaw.add(fang);
@@ -156,16 +131,8 @@ function createEnvironment(scene: THREE.Scene) {
 
   for (let i = 0; i < 38; i += 1) {
     const size = 0.3 + Math.random() * 1.5;
-    rockTransform.position.set(
-      (Math.random() - 0.5) * 30,
-      size * 0.35,
-      -3 - Math.random() * 34,
-    );
-    rockTransform.rotation.set(
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
-    );
+    rockTransform.position.set((Math.random() - 0.5) * 30, size * 0.35, -3 - Math.random() * 34);
+    rockTransform.rotation.set(Math.random() * 2, Math.random() * 2, Math.random() * 2);
     rockTransform.scale.setScalar(size);
     rockTransform.updateMatrix();
     rocks.setMatrixAt(i, rockTransform.matrix);
@@ -176,25 +143,11 @@ function createEnvironment(scene: THREE.Scene) {
 
   const torchStickGeometry = new THREE.CylinderGeometry(0.07, 0.1, 1.2, 8);
   const torchStickMaterial = material(0x2c1c18, 0.05, 0.95);
-  const torchSticks = new THREE.InstancedMesh(
-    torchStickGeometry,
-    torchStickMaterial,
-    9,
-  );
+  const torchSticks = new THREE.InstancedMesh(torchStickGeometry, torchStickMaterial, 9);
 
   const torchFlameGeometry = new THREE.ConeGeometry(0.18, 0.56, 8);
-  const torchFlameMaterial = material(
-    0xff4b25,
-    0.05,
-    0.35,
-    0xff1f00,
-    7,
-  );
-  const torchFlames = new THREE.InstancedMesh(
-    torchFlameGeometry,
-    torchFlameMaterial,
-    9,
-  );
+  const torchFlameMaterial = material(0xff4b25, 0.05, 0.35, 0xff1f00, 7);
+  const torchFlames = new THREE.InstancedMesh(torchFlameGeometry, torchFlameMaterial, 9);
 
   const torchTransform = new THREE.Object3D();
 
@@ -253,11 +206,7 @@ function jawOpenAmount(time: number) {
   return 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(time * 1.5));
 }
 
-export function HellWorld3D({
-  phase,
-  reducedMotion,
-  onBeat,
-}: Props) {
+export function HellWorld3D({ phase, reducedMotion, onBeat }: Props) {
   const host = useRef<HTMLDivElement | null>(null);
   const phaseRef = useRef(phase);
   const onBeatRef = useRef(onBeat);
@@ -287,9 +236,7 @@ export function HellWorld3D({
     renderer.toneMappingExposure = 1.08;
     element.appendChild(renderer.domElement);
 
-    scene.add(
-      new THREE.HemisphereLight(0x2b172d, 0x030106, 0.55),
-    );
+    scene.add(new THREE.HemisphereLight(0x2b172d, 0x030106, 0.55));
 
     const red = new THREE.PointLight(0xff291b, 4.2, 26, 2);
     red.position.set(-3, 6, -10);
@@ -329,11 +276,7 @@ export function HellWorld3D({
     const distant = new THREE.Group();
     for (let i = 0; i < 7; i += 1) {
       const demon = createPythosura(0.12);
-      demon.root.position.set(
-        (Math.random() - 0.5) * 18,
-        0.15,
-        -15 - Math.random() * 17,
-      );
+      demon.root.position.set((Math.random() - 0.5) * 18, 0.15, -15 - Math.random() * 17);
       demon.root.rotation.y = Math.random() * Math.PI;
       distant.add(demon.root);
     }
@@ -364,45 +307,28 @@ export function HellWorld3D({
       const currentPhase = phaseRef.current;
 
       pyth.root.visible =
-        currentPhase === 'arrival' ||
-        currentPhase === 'choice' ||
-        currentPhase === 'portal';
+        currentPhase === 'arrival' || currentPhase === 'choice' || currentPhase === 'portal';
       mini.root.visible = currentPhase === 'guide';
 
       if (currentPhase === 'wake') {
-        camera.position.lerp(
-          new THREE.Vector3(0, 0.82, 3.6),
-          0.035,
-        );
+        camera.position.lerp(new THREE.Vector3(0, 0.82, 3.6), 0.035);
         camera.lookAt(0, 1.2, -10);
         red.intensity = 2.1;
         emitBeat('wake');
       }
 
-      if (
-        currentPhase === 'arrival' ||
-        currentPhase === 'choice'
-      ) {
+      if (currentPhase === 'arrival' || currentPhase === 'choice') {
         pyth.root.visible = true;
         pyth.root.position.z = -0.8;
-        pyth.root.position.y = reducedMotion
-          ? 1.35
-          : riseFromGround(time);
+        pyth.root.position.y = reducedMotion ? 1.35 : riseFromGround(time);
         pyth.root.rotation.y = Math.sin(time * 0.35) * 0.09;
         pyth.head.rotation.y = Math.sin(time * 0.55) * 0.14;
 
-        camera.position.x = reducedMotion
-          ? 0
-          : Math.sin(time * 17) * 0.04;
-        camera.position.y =
-          1.25 +
-          (reducedMotion ? 0 : Math.sin(time * 10) * 0.018);
+        camera.position.x = reducedMotion ? 0 : Math.sin(time * 17) * 0.04;
+        camera.position.y = 1.25 + (reducedMotion ? 0 : Math.sin(time * 10) * 0.018);
         camera.lookAt(0, 3.05, -5);
 
-        if (
-          currentPhase === 'arrival' &&
-          pyth.root.position.y > 0.9
-        ) {
+        if (currentPhase === 'arrival' && pyth.root.position.y > 0.9) {
           emitBeat('emerge');
         }
       }
@@ -416,10 +342,7 @@ export function HellWorld3D({
         pyth.lowerJaw.rotation.x = 0.25 + open * 0.4;
         pyth.portal.scale.setScalar(0.65 + open * 0.42);
 
-        camera.position.lerp(
-          new THREE.Vector3(0, 1.32, 2.45),
-          0.025,
-        );
+        camera.position.lerp(new THREE.Vector3(0, 1.32, 2.45), 0.025);
         camera.lookAt(0, 3.1, -4.7);
         emitBeat('portal');
       }
@@ -427,14 +350,10 @@ export function HellWorld3D({
       if (currentPhase === 'guide') {
         mini.root.visible = true;
         mini.root.position.set(1.25, 0.75, -2.2);
-        mini.root.rotation.y =
-          -0.55 + Math.sin(time * 1.8) * 0.08;
+        mini.root.rotation.y = -0.55 + Math.sin(time * 1.8) * 0.08;
         mini.root.rotation.z = Math.sin(time * 2) * 0.05;
 
-        camera.position.lerp(
-          new THREE.Vector3(0.14, 1.3, 2.75),
-          0.03,
-        );
+        camera.position.lerp(new THREE.Vector3(0.14, 1.3, 2.75), 0.03);
         camera.lookAt(0.2, 1.45, -4);
         emitBeat('guide');
       }
@@ -443,10 +362,7 @@ export function HellWorld3D({
         pyth.root.visible = false;
         mini.root.visible = false;
 
-        camera.position.lerp(
-          new THREE.Vector3(0, 1.55, -3.3),
-          0.025,
-        );
+        camera.position.lerp(new THREE.Vector3(0, 1.55, -3.3), 0.025);
         camera.lookAt(0, 1.55, -10);
         emitBeat('launch');
       }

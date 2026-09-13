@@ -1,17 +1,211 @@
-import {useEffect,useState,type Dispatch,type SetStateAction} from 'react';
-import {ChevronRight,Play,RotateCcw,Square,Trophy} from 'lucide-react';
-import {projects} from '../domain/projects';
-import {claimOneTimeProjectReward} from '../engine/rewardGuard';
-import {PythonRunner} from '../execution/PythonRunner';
-import type {Progress} from '../types/progress';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { ChevronRight, Play, RotateCcw, Square, Trophy } from 'lucide-react';
+import { projects } from '../domain/projects';
+import { claimOneTimeProjectReward } from '../engine/rewardGuard';
+import { PythonRunner } from '../execution/PythonRunner';
+import type { Progress } from '../types/progress';
 
-type Props={progress:Progress;setProgress:Dispatch<SetStateAction<Progress>>};
-function useRunner(){const [runner]=useState(()=>new PythonRunner());useEffect(()=>()=>runner.dispose(),[runner]);return runner}
-export function ProjectFactory({progress,setProgress}:Props){
- const [index,setIndex]=useState(0);const project=projects[index];const [code,setCode]=useState(project.starterCode);const [output,setOutput]=useState('');const [message,setMessage]=useState('');const [running,setRunning]=useState(false);const state=progress.projects[project.id]??{started:false,completed:false,milestones:[]};const runner=useRunner();
- useEffect(()=>{setCode(project.starterCode);setOutput('');setMessage('')},[project.id,project.starterCode]);
- const run=async()=>{if(running)return;setRunning(true);setProgress(p=>p.projects[project.id]?.started?p:{...p,projects:{...p.projects,[project.id]:{started:true,completed:false,milestones:p.projects[project.id]?.milestones??[]}}});setMessage('Running your project, then executing its contract tests…');const visible=await runner.run(code);if(visible.cancelled){setRunning(false);return}setOutput(visible.error?`ERROR\n${visible.error}`:visible.stdout||'(no output)');if(visible.error){setMessage(`Project stopped: ${visible.error}`);setRunning(false);return}for(const pattern of project.validation.requiredPatterns??[]){pattern.lastIndex=0;if(!pattern.test(code)){setMessage(`Contract blocked: required implementation concept is missing (${pattern.source}).`);setRunning(false);return}pattern.lastIndex=0}const encoded=JSON.stringify(code);const harness=JSON.stringify(project.validation.harness);const testProgram=`_src=${encoded}\n_ns={}\nexec(compile(_src,'<project>','exec'),_ns,_ns)\nexec(compile(${harness},'<project-tests>','exec'),_ns,_ns)\nprint('PROJECT_TESTS_PASSED')`;const tested=await runner.run(testProgram);if(tested.cancelled){setRunning(false);return}if(tested.error){setMessage(`Contract failed: ${tested.error}`);setRunning(false);return}setMessage(project.validation.successMessage??'Project contract passed.');setProgress(p=>{const completedMilestones=project.milestones.map(m=>m.id);const next={...p,projects:{...p.projects,[project.id]:{started:true,completed:true,milestones:completedMilestones}}};return claimOneTimeProjectReward(next,project.id,project.rewardXp)});setRunning(false)};
- const stop=()=>{if(!running)return;runner.stop();setOutput('ERROR\nExecution stopped by user.');setMessage('Execution cancelled. Fix the code and run again.');setRunning(false)};
- const reset=()=>{if(running)runner.stop();setRunning(false);setCode(project.starterCode);setOutput('');setMessage('Starter contract restored. Project progress remains saved.')};
- return <div className="page"><div className="section-heading"><div><div className="eyebrow">PROJECT FACTORY // {project.tier.toUpperCase()}</div><h1>{project.title}</h1></div><button className="back-btn" onClick={()=>setIndex(i=>(i+1)%projects.length)}>NEXT PROJECT <ChevronRight size={15}/></button></div><p className="lead">{project.brief} <b>{state.completed?'Contract completed.':'Complete the executable contract to clear the project.'}</b></p><div className="panel project-contract"><div className="project-contract-top"><div><span className="eyebrow">MISSION CONTRACT</span><h2>{project.firstTask}</h2></div><div className="project-reward"><Trophy size={16}/><b>+{project.rewardXp} XP</b></div></div><div className="project-skills">{project.skills.map(skill=><span key={skill}>{skill}</span>)}</div></div><div className="arena"><textarea spellCheck={false} value={code} onChange={e=>setCode(e.target.value)} aria-label={`${project.name} project editor`} onKeyDown={e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();void run()}}}/><div className="arena-side"><div className="editor-actions">{running?<button className="run-btn" onClick={stop}><Square size={14}/> STOP</button>:<button className="run-btn" disabled={state.completed} onClick={()=>void run()}>{state.completed?'PROJECT CLEARED':'RUN & TEST'} <Play size={15}/></button>}<button onClick={reset}><RotateCcw size={14}/> RESET</button></div><div className="terminal-output"><div>PROJECT OUTPUT</div><pre>{output||'Run the project to see stdout. Contract tests run after a clean execution.'}</pre></div></div></div>{message&&<div className={`panel feedback ${state.completed?'success-row':''}`} role="status">{message}</div>}<div className="panel project-plan"><div className="eyebrow">MILESTONES // {state.milestones.length}/{project.milestones.length} CLEARED</div>{project.milestones.map(m=><div key={m.id} className="milestone"><span className={`milestone-state ${state.milestones.includes(m.id)?'done':''}`}>{state.milestones.includes(m.id)?'✓':'○'}</span><span><b>{m.title}</b>{m.objective}<small>{m.acceptance.join(' · ')}</small></span></div>)}</div></div>;
+type Props = { progress: Progress; setProgress: Dispatch<SetStateAction<Progress>> };
+function useRunner() {
+  const [runner] = useState(() => new PythonRunner());
+  useEffect(() => () => runner.dispose(), [runner]);
+  return runner;
+}
+export function ProjectFactory({ progress, setProgress }: Props) {
+  const [index, setIndex] = useState(0);
+  const project = projects[index];
+  const [code, setCode] = useState(project.starterCode);
+  const [output, setOutput] = useState('');
+  const [message, setMessage] = useState('');
+  const [running, setRunning] = useState(false);
+  const state = progress.projects[project.id] ?? {
+    started: false,
+    completed: false,
+    milestones: [],
+  };
+  const runner = useRunner();
+  useEffect(() => {
+    setCode(project.starterCode);
+    setOutput('');
+    setMessage('');
+  }, [project.id, project.starterCode]);
+  const run = async () => {
+    if (running) return;
+    setRunning(true);
+    setProgress((p) =>
+      p.projects[project.id]?.started
+        ? p
+        : {
+            ...p,
+            projects: {
+              ...p.projects,
+              [project.id]: {
+                started: true,
+                completed: false,
+                milestones: p.projects[project.id]?.milestones ?? [],
+              },
+            },
+          },
+    );
+    setMessage('Running your project, then executing its contract tests…');
+    const visible = await runner.run(code);
+    if (visible.cancelled) {
+      setRunning(false);
+      return;
+    }
+    setOutput(visible.error ? `ERROR\n${visible.error}` : visible.stdout || '(no output)');
+    if (visible.error) {
+      setMessage(`Project stopped: ${visible.error}`);
+      setRunning(false);
+      return;
+    }
+    for (const pattern of project.validation.requiredPatterns ?? []) {
+      pattern.lastIndex = 0;
+      if (!pattern.test(code)) {
+        setMessage(
+          `Contract blocked: required implementation concept is missing (${pattern.source}).`,
+        );
+        setRunning(false);
+        return;
+      }
+      pattern.lastIndex = 0;
+    }
+    const encoded = JSON.stringify(code);
+    const harness = JSON.stringify(project.validation.harness);
+    const testProgram = `_src=${encoded}\n_ns={}\nexec(compile(_src,'<project>','exec'),_ns,_ns)\nexec(compile(${harness},'<project-tests>','exec'),_ns,_ns)\nprint('PROJECT_TESTS_PASSED')`;
+    const tested = await runner.run(testProgram);
+    if (tested.cancelled) {
+      setRunning(false);
+      return;
+    }
+    if (tested.error) {
+      setMessage(`Contract failed: ${tested.error}`);
+      setRunning(false);
+      return;
+    }
+    setMessage(project.validation.successMessage ?? 'Project contract passed.');
+    setProgress((p) => {
+      const completedMilestones = project.milestones.map((m) => m.id);
+      const next = {
+        ...p,
+        projects: {
+          ...p.projects,
+          [project.id]: { started: true, completed: true, milestones: completedMilestones },
+        },
+      };
+      return claimOneTimeProjectReward(next, project.id, project.rewardXp);
+    });
+    setRunning(false);
+  };
+  const stop = () => {
+    if (!running) return;
+    runner.stop();
+    setOutput('ERROR\nExecution stopped by user.');
+    setMessage('Execution cancelled. Fix the code and run again.');
+    setRunning(false);
+  };
+  const reset = () => {
+    if (running) runner.stop();
+    setRunning(false);
+    setCode(project.starterCode);
+    setOutput('');
+    setMessage('Starter contract restored. Project progress remains saved.');
+  };
+  return (
+    <div className="page">
+      <div className="section-heading">
+        <div>
+          <div className="eyebrow">PROJECT FACTORY // {project.tier.toUpperCase()}</div>
+          <h1>{project.title}</h1>
+        </div>
+        <button className="back-btn" onClick={() => setIndex((i) => (i + 1) % projects.length)}>
+          NEXT PROJECT <ChevronRight size={15} />
+        </button>
+      </div>
+      <p className="lead">
+        {project.brief}{' '}
+        <b>
+          {state.completed
+            ? 'Contract completed.'
+            : 'Complete the executable contract to clear the project.'}
+        </b>
+      </p>
+      <div className="panel project-contract">
+        <div className="project-contract-top">
+          <div>
+            <span className="eyebrow">MISSION CONTRACT</span>
+            <h2>{project.firstTask}</h2>
+          </div>
+          <div className="project-reward">
+            <Trophy size={16} />
+            <b>+{project.rewardXp} XP</b>
+          </div>
+        </div>
+        <div className="project-skills">
+          {project.skills.map((skill) => (
+            <span key={skill}>{skill}</span>
+          ))}
+        </div>
+      </div>
+      <div className="arena">
+        <textarea
+          spellCheck={false}
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          aria-label={`${project.name} project editor`}
+          onKeyDown={(e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              void run();
+            }
+          }}
+        />
+        <div className="arena-side">
+          <div className="editor-actions">
+            {running ? (
+              <button className="run-btn" onClick={stop}>
+                <Square size={14} /> STOP
+              </button>
+            ) : (
+              <button className="run-btn" disabled={state.completed} onClick={() => void run()}>
+                {state.completed ? 'PROJECT CLEARED' : 'RUN & TEST'} <Play size={15} />
+              </button>
+            )}
+            <button onClick={reset}>
+              <RotateCcw size={14} /> RESET
+            </button>
+          </div>
+          <div className="terminal-output">
+            <div>PROJECT OUTPUT</div>
+            <pre>
+              {output ||
+                'Run the project to see stdout. Contract tests run after a clean execution.'}
+            </pre>
+          </div>
+        </div>
+      </div>
+      {message && (
+        <div className={`panel feedback ${state.completed ? 'success-row' : ''}`} role="status">
+          {message}
+        </div>
+      )}
+      <div className="panel project-plan">
+        <div className="eyebrow">
+          MILESTONES // {state.milestones.length}/{project.milestones.length} CLEARED
+        </div>
+        {project.milestones.map((m) => (
+          <div key={m.id} className="milestone">
+            <span className={`milestone-state ${state.milestones.includes(m.id) ? 'done' : ''}`}>
+              {state.milestones.includes(m.id) ? '✓' : '○'}
+            </span>
+            <span>
+              <b>{m.title}</b>
+              {m.objective}
+              <small>{m.acceptance.join(' · ')}</small>
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

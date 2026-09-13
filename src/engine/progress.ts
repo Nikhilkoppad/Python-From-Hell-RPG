@@ -1,27 +1,307 @@
-import type {Progress,AttemptStats} from '../types/progress';
-import {lessonCatalog} from '../domain/lessons';
-import {updateStreak} from './streaks';
-import {ACHIEVEMENTS,grantAchievement} from './achievements';
-import {recordAttempt as adaptiveRecordAttempt,type AttemptOutcome, type MasteryRecord} from './adaptive';
-const KEY='python-from-hell:rpg-progress:v3';
-const LEGACY_KEYS=['python-from-hell:rpg-progress:v2','python-from-hell:rpg-progress:v1'];
-const blankAttempt=():AttemptStats=>({attempts:0,successes:0,failures:0,hintsUsed:0,totalMs:0,lastOutcome:null,mastery:0});
-type LegacyV1={version:1;currentLayer?:number;currentLessonId?:string;completedLessons:string[];xp:number;streak?:number;mastery?:Record<string,number>;achievements?:string[];settings?:Partial<Progress['settings']>};
-type LegacyV2={version?:number;currentLayer?:number;currentLessonId?:string;completedLessons?:string[];lessonRewards?:string[];xp?:number;streak?:number;longestStreak?:number;lastActiveDate?:string|null;mastery?:Record<string,number>;attempts?:Record<string,AttemptStats>;achievements?:string[];unlockedBosses?:string[];completedBosses?:string[];bossPhaseProgress?:Record<string,number>;projectRewards?:string[];debugRewards?:string[];codingRewards?:number;projects?:Progress['projects'];interview?:Partial<Progress['interview']>;settings?:Partial<Progress['settings']>};
-export function createInitialProgress():Progress{return{version:3,currentLayer:1,currentLessonId:'l1_print',completedLessons:[],lessonRewards:[],xp:0,streak:0,longestStreak:0,lastActiveDate:null,mastery:{},attempts:{},achievements:[],unlockedBosses:['loop-demon'],completedBosses:[],bossPhaseProgress:{},projectRewards:[],debugRewards:[],codingRewards:0,projects:{},interview:{round:0,score:0,rank:'UNRANKED',rewarded:false},settings:{roastIntensity:'SAVAGE',sound:false,reducedMotion:false}}}
-function normalizeAttempts(input:Record<string,AttemptStats>|undefined){const out:Record<string,AttemptStats>={};for(const[id,value]of Object.entries(input??{})){out[id]={...blankAttempt(),...value,mastery:Math.max(0,Math.min(100,Number(value.mastery)||0))}}return out}
-function fromV2(p:LegacyV2):Progress{const base=createInitialProgress();return{...base,version:3,currentLayer:p.currentLayer??base.currentLayer,currentLessonId:p.currentLessonId??base.currentLessonId,completedLessons:p.completedLessons??[],lessonRewards:p.lessonRewards??p.completedLessons??[],xp:p.xp??0,streak:p.streak??0,longestStreak:p.longestStreak??0,lastActiveDate:p.lastActiveDate??null,mastery:p.mastery??{},attempts:normalizeAttempts(p.attempts),achievements:p.achievements??[],unlockedBosses:p.unlockedBosses??base.unlockedBosses,completedBosses:p.completedBosses??[],bossPhaseProgress:p.bossPhaseProgress??{},projectRewards:p.projectRewards??[],debugRewards:p.debugRewards??[],codingRewards:p.codingRewards??0,projects:p.projects??{},interview:{...base.interview,...p.interview,rewarded:p.interview?.rewarded??false},settings:{...base.settings,...p.settings}}}
-function migrate(raw:unknown):Progress|null{if(!raw||typeof raw!=='object')return null;const p=raw as LegacyV2;if(p.version===3&&Array.isArray(p.completedLessons)&&typeof p.xp==='number')return fromV2(p);if(p.version===2&&Array.isArray(p.completedLessons)&&typeof p.xp==='number')return fromV2(p);const legacy=raw as LegacyV1;if(legacy.version===1&&Array.isArray(legacy.completedLessons)&&typeof legacy.xp==='number'){const attempts:Record<string,AttemptStats>={};for(const[id,mastery]of Object.entries(legacy.mastery??{}))attempts[id]={...blankAttempt(),mastery:Math.max(0,Math.min(100,Number(mastery)||0))};return{...createInitialProgress(),currentLayer:legacy.currentLayer??1,currentLessonId:legacy.currentLessonId??'l1_print',completedLessons:legacy.completedLessons,lessonRewards:[...legacy.completedLessons],xp:legacy.xp,streak:legacy.streak??0,mastery:legacy.mastery??{},attempts,achievements:legacy.achievements??[],settings:{...createInitialProgress().settings,...legacy.settings}}}return null}
-export function loadProgress():Progress|null{try{const raw=localStorage.getItem(KEY)??LEGACY_KEYS.map(k=>localStorage.getItem(k)).find(Boolean);if(!raw)return null;const migrated=migrate(JSON.parse(raw));if(migrated)saveProgress(migrated);return migrated}catch{return null}}
-export function saveProgress(p:Progress){try{localStorage.setItem(KEY,JSON.stringify(p));if(typeof window!=='undefined')window.dispatchEvent(new Event('pfh:progress'))}catch{}}
-export function awardXp(p:Progress,amount:number):Progress{return{...updateStreak(p),xp:Math.max(0,p.xp+Math.max(0,amount))}}
-function adaptiveMapFromProgress(p:Progress):Record<string,MasteryRecord>{return Object.fromEntries(Object.entries(p.attempts).map(([id,a])=>[id,{attempts:a.attempts,successes:a.successes,failures:a.failures,hintsUsed:a.hintsUsed,totalMs:a.totalMs,lastOutcome:a.lastOutcome,mastery:a.mastery/100}]))}
-export function recordAttempt(p:Progress,lessonId:string,success:boolean,hintUsed=false,elapsedMs=0,outcome?:AttemptOutcome):Progress{const selected:AttemptOutcome=outcome??(success?'success':'failure');const adaptive=adaptiveRecordAttempt(adaptiveMapFromProgress(p),lessonId,selected,elapsedMs,hintUsed);const nextRecord=adaptive.mastery[lessonId];const attempts:AttemptStats={attempts:nextRecord.attempts,successes:nextRecord.successes,failures:nextRecord.failures,hintsUsed:nextRecord.hintsUsed,totalMs:nextRecord.totalMs,lastOutcome:nextRecord.lastOutcome,mastery:Math.round(nextRecord.mastery*10)/10};return{...updateStreak(p),attempts:{...p.attempts,[lessonId]:attempts},mastery:{...p.mastery,[lessonId]:attempts.mastery}}}
-export function completeLesson(p:Progress,id:string):Progress{if(p.completedLessons.includes(id))return p;const layer=lessonCatalog.find(lesson=>lesson.id===id)?.layer??p.currentLayer;return{...updateStreak(p),currentLayer:Math.max(1,layer),currentLessonId:id,completedLessons:[...p.completedLessons,id],mastery:{...p.mastery,[id]:100},attempts:{...p.attempts,[id]:{...(p.attempts[id]??blankAttempt()),mastery:100,lastOutcome:'success'}}}}
-export function claimLessonReward(p:Progress,id:string,amount:number,noHint=false):Progress{if(p.lessonRewards.includes(id))return p;let achievements=p.achievements;if(noHint)achievements=grantAchievement(achievements,ACHIEVEMENTS.NO_HINTS);return awardXp({...p,lessonRewards:[...p.lessonRewards,id],achievements},amount)}
-export function claimCodingReward(p:Progress):Progress{if(p.codingRewards>0)return p;return awardXp({...p,codingRewards:1,achievements:grantAchievement(p.achievements,ACHIEVEMENTS.FIRST_BLOOD)},20)}
-export function claimDebugReward(p:Progress,caseId:string):Progress{if(p.debugRewards.includes(caseId))return p;return awardXp({...p,debugRewards:[...p.debugRewards,caseId],achievements:grantAchievement(p.achievements,ACHIEVEMENTS.BUG_SLAYER)},40)}
-const bossAchievement:Record<string,string>={'loop-demon':ACHIEVEMENTS.LOOP_SURVIVOR,'function-lord':ACHIEVEMENTS.FUNCTION_SUMMONER,'exception-beast':ACHIEVEMENTS.EXCEPTION_HANDLER,'memory-reaper':ACHIEVEMENTS.MEMORY_MONSTER,'cpython-core':ACHIEVEMENTS.JIT_JUGGLER};
-export function claimBossReward(p:Progress,bossId:string,rewardXp:number):Progress{if(p.completedBosses.includes(bossId))return p;let achievements=grantAchievement(p.achievements,ACHIEVEMENTS.BOSS_SLAYER);if(bossAchievement[bossId])achievements=grantAchievement(achievements,bossAchievement[bossId]);if(bossId==='cpython-core')achievements=grantAchievement(achievements,ACHIEVEMENTS.PYTHON_OVERLORD);return awardXp({...p,completedBosses:[...p.completedBosses,bossId],unlockedBosses:[...new Set([...p.unlockedBosses,bossId])],achievements},rewardXp)}
-export function setBossPhase(p:Progress,bossId:string,phase:number):Progress{return{...p,bossPhaseProgress:{...p.bossPhaseProgress,[bossId]:Math.max(0,phase)}}}
-export function claimInterviewReward(p:Progress):Progress{if(p.interview.rewarded)return p;return awardXp({...p,interview:{...p.interview,rewarded:true},achievements:grantAchievement(p.achievements,ACHIEVEMENTS.INTERVIEW_SURVIVOR)},50)}
+import type { Progress, AttemptStats } from '../types/progress';
+import { lessonCatalog } from '../domain/lessons';
+import { updateStreak } from './streaks';
+import { ACHIEVEMENTS, grantAchievement } from './achievements';
+import {
+  recordAttempt as adaptiveRecordAttempt,
+  type AttemptOutcome,
+  type MasteryRecord,
+} from './adaptive';
+const KEY = 'python-from-hell:rpg-progress:v3';
+const LEGACY_KEYS = ['python-from-hell:rpg-progress:v2', 'python-from-hell:rpg-progress:v1'];
+const blankAttempt = (): AttemptStats => ({
+  attempts: 0,
+  successes: 0,
+  failures: 0,
+  hintsUsed: 0,
+  totalMs: 0,
+  lastOutcome: null,
+  mastery: 0,
+});
+type LegacyV1 = {
+  version: 1;
+  currentLayer?: number;
+  currentLessonId?: string;
+  completedLessons: string[];
+  xp: number;
+  streak?: number;
+  mastery?: Record<string, number>;
+  achievements?: string[];
+  settings?: Partial<Progress['settings']>;
+};
+type LegacyV2 = {
+  version?: number;
+  currentLayer?: number;
+  currentLessonId?: string;
+  completedLessons?: string[];
+  lessonRewards?: string[];
+  xp?: number;
+  streak?: number;
+  longestStreak?: number;
+  lastActiveDate?: string | null;
+  mastery?: Record<string, number>;
+  attempts?: Record<string, AttemptStats>;
+  achievements?: string[];
+  unlockedBosses?: string[];
+  completedBosses?: string[];
+  bossPhaseProgress?: Record<string, number>;
+  projectRewards?: string[];
+  debugRewards?: string[];
+  codingRewards?: number;
+  projects?: Progress['projects'];
+  interview?: Partial<Progress['interview']>;
+  settings?: Partial<Progress['settings']>;
+};
+export function createInitialProgress(): Progress {
+  return {
+    version: 3,
+    currentLayer: 1,
+    currentLessonId: 'l1_print',
+    completedLessons: [],
+    lessonRewards: [],
+    xp: 0,
+    streak: 0,
+    longestStreak: 0,
+    lastActiveDate: null,
+    mastery: {},
+    attempts: {},
+    achievements: [],
+    unlockedBosses: ['loop-demon'],
+    completedBosses: [],
+    bossPhaseProgress: {},
+    projectRewards: [],
+    debugRewards: [],
+    codingRewards: 0,
+    projects: {},
+    interview: { round: 0, score: 0, rank: 'UNRANKED', rewarded: false },
+    settings: { roastIntensity: 'SAVAGE', sound: false, reducedMotion: false },
+  };
+}
+function normalizeAttempts(input: Record<string, AttemptStats> | undefined) {
+  const out: Record<string, AttemptStats> = {};
+  for (const [id, value] of Object.entries(input ?? {})) {
+    out[id] = {
+      ...blankAttempt(),
+      ...value,
+      mastery: Math.max(0, Math.min(100, Number(value.mastery) || 0)),
+    };
+  }
+  return out;
+}
+function fromV2(p: LegacyV2): Progress {
+  const base = createInitialProgress();
+  return {
+    ...base,
+    version: 3,
+    currentLayer: p.currentLayer ?? base.currentLayer,
+    currentLessonId: p.currentLessonId ?? base.currentLessonId,
+    completedLessons: p.completedLessons ?? [],
+    lessonRewards: p.lessonRewards ?? p.completedLessons ?? [],
+    xp: p.xp ?? 0,
+    streak: p.streak ?? 0,
+    longestStreak: p.longestStreak ?? 0,
+    lastActiveDate: p.lastActiveDate ?? null,
+    mastery: p.mastery ?? {},
+    attempts: normalizeAttempts(p.attempts),
+    achievements: p.achievements ?? [],
+    unlockedBosses: p.unlockedBosses ?? base.unlockedBosses,
+    completedBosses: p.completedBosses ?? [],
+    bossPhaseProgress: p.bossPhaseProgress ?? {},
+    projectRewards: p.projectRewards ?? [],
+    debugRewards: p.debugRewards ?? [],
+    codingRewards: p.codingRewards ?? 0,
+    projects: p.projects ?? {},
+    interview: { ...base.interview, ...p.interview, rewarded: p.interview?.rewarded ?? false },
+    settings: { ...base.settings, ...p.settings },
+  };
+}
+function migrate(raw: unknown): Progress | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const p = raw as LegacyV2;
+  if (p.version === 3 && Array.isArray(p.completedLessons) && typeof p.xp === 'number')
+    return fromV2(p);
+  if (p.version === 2 && Array.isArray(p.completedLessons) && typeof p.xp === 'number')
+    return fromV2(p);
+  const legacy = raw as LegacyV1;
+  if (
+    legacy.version === 1 &&
+    Array.isArray(legacy.completedLessons) &&
+    typeof legacy.xp === 'number'
+  ) {
+    const attempts: Record<string, AttemptStats> = {};
+    for (const [id, mastery] of Object.entries(legacy.mastery ?? {}))
+      attempts[id] = {
+        ...blankAttempt(),
+        mastery: Math.max(0, Math.min(100, Number(mastery) || 0)),
+      };
+    return {
+      ...createInitialProgress(),
+      currentLayer: legacy.currentLayer ?? 1,
+      currentLessonId: legacy.currentLessonId ?? 'l1_print',
+      completedLessons: legacy.completedLessons,
+      lessonRewards: [...legacy.completedLessons],
+      xp: legacy.xp,
+      streak: legacy.streak ?? 0,
+      mastery: legacy.mastery ?? {},
+      attempts,
+      achievements: legacy.achievements ?? [],
+      settings: { ...createInitialProgress().settings, ...legacy.settings },
+    };
+  }
+  return null;
+}
+export function loadProgress(): Progress | null {
+  try {
+    const raw =
+      localStorage.getItem(KEY) ?? LEGACY_KEYS.map((k) => localStorage.getItem(k)).find(Boolean);
+    if (!raw) return null;
+    const migrated = migrate(JSON.parse(raw));
+    if (migrated) saveProgress(migrated);
+    return migrated;
+  } catch {
+    return null;
+  }
+}
+export function saveProgress(p: Progress) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(p));
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('pfh:progress'));
+  } catch {}
+}
+export function awardXp(p: Progress, amount: number): Progress {
+  return { ...updateStreak(p), xp: Math.max(0, p.xp + Math.max(0, amount)) };
+}
+function adaptiveMapFromProgress(p: Progress): Record<string, MasteryRecord> {
+  return Object.fromEntries(
+    Object.entries(p.attempts).map(([id, a]) => [
+      id,
+      {
+        attempts: a.attempts,
+        successes: a.successes,
+        failures: a.failures,
+        hintsUsed: a.hintsUsed,
+        totalMs: a.totalMs,
+        lastOutcome: a.lastOutcome,
+        mastery: a.mastery / 100,
+      },
+    ]),
+  );
+}
+export function recordAttempt(
+  p: Progress,
+  lessonId: string,
+  success: boolean,
+  hintUsed = false,
+  elapsedMs = 0,
+  outcome?: AttemptOutcome,
+): Progress {
+  const selected: AttemptOutcome = outcome ?? (success ? 'success' : 'failure');
+  const adaptive = adaptiveRecordAttempt(
+    adaptiveMapFromProgress(p),
+    lessonId,
+    selected,
+    elapsedMs,
+    hintUsed,
+  );
+  const nextRecord = adaptive.mastery[lessonId];
+  const attempts: AttemptStats = {
+    attempts: nextRecord.attempts,
+    successes: nextRecord.successes,
+    failures: nextRecord.failures,
+    hintsUsed: nextRecord.hintsUsed,
+    totalMs: nextRecord.totalMs,
+    lastOutcome: nextRecord.lastOutcome,
+    mastery: Math.round(nextRecord.mastery * 10) / 10,
+  };
+  return {
+    ...updateStreak(p),
+    attempts: { ...p.attempts, [lessonId]: attempts },
+    mastery: { ...p.mastery, [lessonId]: attempts.mastery },
+  };
+}
+export function completeLesson(p: Progress, id: string): Progress {
+  if (p.completedLessons.includes(id)) return p;
+  const layer = lessonCatalog.find((lesson) => lesson.id === id)?.layer ?? p.currentLayer;
+  return {
+    ...updateStreak(p),
+    currentLayer: Math.max(1, layer),
+    currentLessonId: id,
+    completedLessons: [...p.completedLessons, id],
+    mastery: { ...p.mastery, [id]: 100 },
+    attempts: {
+      ...p.attempts,
+      [id]: { ...(p.attempts[id] ?? blankAttempt()), mastery: 100, lastOutcome: 'success' },
+    },
+  };
+}
+export function claimLessonReward(
+  p: Progress,
+  id: string,
+  amount: number,
+  noHint = false,
+): Progress {
+  if (p.lessonRewards.includes(id)) return p;
+  let achievements = p.achievements;
+  if (noHint) achievements = grantAchievement(achievements, ACHIEVEMENTS.NO_HINTS);
+  return awardXp({ ...p, lessonRewards: [...p.lessonRewards, id], achievements }, amount);
+}
+export function claimCodingReward(p: Progress): Progress {
+  if (p.codingRewards > 0) return p;
+  return awardXp(
+    {
+      ...p,
+      codingRewards: 1,
+      achievements: grantAchievement(p.achievements, ACHIEVEMENTS.FIRST_BLOOD),
+    },
+    20,
+  );
+}
+export function claimDebugReward(p: Progress, caseId: string): Progress {
+  if (p.debugRewards.includes(caseId)) return p;
+  return awardXp(
+    {
+      ...p,
+      debugRewards: [...p.debugRewards, caseId],
+      achievements: grantAchievement(p.achievements, ACHIEVEMENTS.BUG_SLAYER),
+    },
+    40,
+  );
+}
+const bossAchievement: Record<string, string> = {
+  'loop-demon': ACHIEVEMENTS.LOOP_SURVIVOR,
+  'function-lord': ACHIEVEMENTS.FUNCTION_SUMMONER,
+  'exception-beast': ACHIEVEMENTS.EXCEPTION_HANDLER,
+  'memory-reaper': ACHIEVEMENTS.MEMORY_MONSTER,
+  'cpython-core': ACHIEVEMENTS.JIT_JUGGLER,
+};
+export function claimBossReward(p: Progress, bossId: string, rewardXp: number): Progress {
+  if (p.completedBosses.includes(bossId)) return p;
+  let achievements = grantAchievement(p.achievements, ACHIEVEMENTS.BOSS_SLAYER);
+  if (bossAchievement[bossId])
+    achievements = grantAchievement(achievements, bossAchievement[bossId]);
+  if (bossId === 'cpython-core')
+    achievements = grantAchievement(achievements, ACHIEVEMENTS.PYTHON_OVERLORD);
+  return awardXp(
+    {
+      ...p,
+      completedBosses: [...p.completedBosses, bossId],
+      unlockedBosses: [...new Set([...p.unlockedBosses, bossId])],
+      achievements,
+    },
+    rewardXp,
+  );
+}
+export function setBossPhase(p: Progress, bossId: string, phase: number): Progress {
+  return { ...p, bossPhaseProgress: { ...p.bossPhaseProgress, [bossId]: Math.max(0, phase) } };
+}
+export function claimInterviewReward(p: Progress): Progress {
+  if (p.interview.rewarded) return p;
+  return awardXp(
+    {
+      ...p,
+      interview: { ...p.interview, rewarded: true },
+      achievements: grantAchievement(p.achievements, ACHIEVEMENTS.INTERVIEW_SURVIVOR),
+    },
+    50,
+  );
+}
