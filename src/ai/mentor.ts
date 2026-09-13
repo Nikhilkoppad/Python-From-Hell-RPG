@@ -31,7 +31,7 @@ export async function askMentor(context: MentorContext, provider?: MentorProvide
   catch { return fallback(context); }
 }
 
-export function createOllamaProvider(endpoint='http://localhost:11434/api', model='gemma4:latest'): MentorProvider {
+export function createOllamaProvider(endpoint='http://127.0.0.1:11434/api', model='gemma4:latest'): MentorProvider {
   return {
     async ask(context) {
       const response = await fetch(`${endpoint.replace(/\/$/, '')}/chat`, {
