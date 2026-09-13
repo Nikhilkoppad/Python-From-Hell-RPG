@@ -184,10 +184,7 @@ function embers(scene: THREE.Scene) {
   }
 
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute(
-    'position',
-    new THREE.BufferAttribute(positions, 3),
-  );
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
   const points = new THREE.Points(
     geometry,
