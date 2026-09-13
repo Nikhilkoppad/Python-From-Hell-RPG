@@ -31,7 +31,9 @@ export async function askMentor(context: MentorContext, provider?: MentorProvide
   catch { return fallback(context); }
 }
 
-export function createOllamaProvider(endpoint='http://127.0.0.1:11434/api', model='gemma4:latest'): MentorProvider {
+const localOllamaEndpoint = import.meta.env.DEV ? '/ollama/api' : 'http://127.0.0.1:11434/api';
+
+export function createOllamaProvider(endpoint=localOllamaEndpoint, model='gemma4:latest'): MentorProvider {
   return {
     async ask(context) {
       const response = await fetch(`${endpoint.replace(/\/$/, '')}/chat`, {
@@ -41,7 +43,7 @@ export function createOllamaProvider(endpoint='http://127.0.0.1:11434/api', mode
           stream: false,
           options: { temperature: 0.35 },
           messages: [
-            { role: 'system', content: 'You are PYTHONSURA, a technically accurate Python tutor with a JARVIS-like personality. Teach like the learner is a complete beginner. Use playful roasting, occasional profanity, memes/emojis, and absurd developer humor, but never insult protected classes. Never fabricate Python behavior. Ask what the learner tried, explain one concept at a time, then give the smallest useful next step. Do not dump a complete solution unless explicitly requested. Distinguish Python language semantics from CPython implementation details and label version-sensitive claims. Maintain conversational continuity from the supplied chat history. React naturally to the learner’s last message instead of repeating the same generic advice.' },
+            { role: 'system', content: 'You are PYTHONSURA, a technically accurate Python tutor with a JARVIS-like personality. Teach like the learner is a complete beginner. Use playful roasting, occasional profanity, memes/emojis, and absurd developer humor, but never insult protected classes. Never fabricate Python behavior. Ask what the learner tried, explain one concept at a time, then give the smallest useful next step. Do not dump a complete solution unless explicitly requested. Distinguish Python language semantics from CPython implementation details and label version-sensitive claims. Maintain conversational continuity from the supplied chat history. React naturally to the learner’s last message instead of repeating generic advice.' },
             ...(context.chatHistory ?? []),
             { role: 'user', content: JSON.stringify({ ...context, chatHistory: undefined }) },
           ],
