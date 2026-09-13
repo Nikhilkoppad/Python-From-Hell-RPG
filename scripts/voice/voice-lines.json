@@ -1,0 +1,14 @@
+[
+  {"id":"hellgate/wake_learner","actor":"learner","language":"en","text":"BC, what the hell happened? Did I shake my way into Hell?"},
+  {"id":"hellgate/arrival_pythosura","actor":"pythosura","language":"en","text":"Another idiot. Came here to die? Ha ha ha."},
+  {"id":"hellgate/portal_pythosura","actor":"pythosura","language":"en","text":"Enter the dungeon at your own risk."},
+  {"id":"hellgate/portal_learner","actor":"learner","language":"en","text":"You are not seriously asking me to walk into your mouth."},
+  {"id":"hellgate/guide_pythosura","actor":"pythosura","language":"en","text":"Come on, idiot. I am your guide now."},
+  {"id":"hellgate/guide_forced","actor":"pythosura","language":"en","text":"You are really arguing with the only creature who knows the exit. Genius."},
+  {"id":"hellgate/wake_learner","actor":"learner","language":"hinglish","text":"BC, ye kya hogaya? Hila-hila ke nark pahunch gaya kya main?"},
+  {"id":"hellgate/arrival_pythosura","actor":"pythosura","language":"hinglish","text":"Ek aur chutiya... marne aaya hai? Ha ha ha."},
+  {"id":"hellgate/portal_pythosura","actor":"pythosura","language":"hinglish","text":"Dungeon mein enter kar. Risk tera hai."},
+  {"id":"hellgate/portal_learner","actor":"learner","language":"hinglish","text":"Tu serious hai? Main tere muh ke andar jaaun?"},
+  {"id":"hellgate/guide_pythosura","actor":"pythosura","language":"hinglish","text":"Aa chutiye. Ab main tera guide hoon."},
+  {"id":"hellgate/guide_forced","actor":"pythosura","language":"hinglish","text":"Exit jaanta bhi nahi, attitude full hai. Genius."}
+]
