@@ -12,7 +12,7 @@ import {HellGateExperience} from './components/HellGateExperience';
 import {ErrorBoundary} from './components/ErrorBoundary';
 import {createInitialProgress,loadProgress} from './engine/progress';
 
-const HELLGATE_VERSION_KEY='python-from-hell:hellgate:v2';
+const HELLGATE_VERSION_KEY='python-from-hell:hellgate:v3';
 const PROGRESS_KEY='python-from-hell:rpg-progress:v3';
 const ENTERED_KEY='python-from-hell:entered';
 function ExperienceRoot(){

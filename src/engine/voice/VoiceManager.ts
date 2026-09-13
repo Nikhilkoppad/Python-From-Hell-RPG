@@ -1,89 +1,196 @@
-export type VoiceActor='pythosura'|'learner'|'narrator'|'boss'|'system';
-export type VoiceLanguage='en'|'hinglish';
-export type VoicePriority='low'|'normal'|'high'|'critical';
-export type VoiceLine={id:string;text:string;actor:VoiceActor;language:VoiceLanguage;priority?:VoicePriority;volume?:number};
+import { hellAudio } from '../hellAudio';
 
-type QueuedLine={line:VoiceLine;resolve:(played:boolean)=>void};
+export type VoiceActor = 'pythosura' | 'learner' | 'narrator' | 'boss' | 'system';
 
-class VoiceManager{
- private cache=new Map<string,HTMLAudioElement>();
- private current?:HTMLAudioElement;
- private queue:QueuedLine[]=[];
- private enabled=true;
- private masterVolume=.9;
- private generation=0;
- private unlocked=false;
- private unlockHandler?:()=>void;
+export type VoiceLanguage = 'en' | 'hinglish';
 
- private getPath(line:VoiceLine){return `/audio/voice/${line.language}/${line.actor}/${line.id}.mp3`}
+export type VoicePriority = 'low' | 'normal' | 'high' | 'critical';
 
- setEnabled(enabled:boolean){this.enabled=enabled;if(!enabled){this.stop();this.queue=[]}}
- setVolume(volume:number){this.masterVolume=Math.max(0,Math.min(1,volume));if(this.current)this.current.volume=Math.max(0,Math.min(1,this.masterVolume))}
- isEnabled(){return this.enabled}
+export type VoiceLine = {
+id: string;
+text: string;
+actor: VoiceActor;
+language: VoiceLanguage;
+priority?: VoicePriority;
+volume?: number;
+};
 
- unlock(){
-  if(this.unlocked||typeof window==='undefined')return;
-  this.unlocked=true;
-  if(this.unlockHandler){window.removeEventListener('pointerdown',this.unlockHandler);window.removeEventListener('keydown',this.unlockHandler);this.unlockHandler=undefined}
-  void this.drain();
- }
- installAutoplayUnlock(){
-  if(typeof window==='undefined'||this.unlocked||this.unlockHandler)return;
-  this.unlockHandler=()=>this.unlock();
-  window.addEventListener('pointerdown',this.unlockHandler,{once:true,passive:true});
-  window.addEventListener('keydown',this.unlockHandler,{once:true,passive:true});
- }
+type AudioCache = Map<string, HTMLAudioElement>;
 
- stop(){this.generation++;if(this.current){this.current.pause();this.current.currentTime=0;this.current=undefined}}
+class VoiceManager {
+private cache: AudioCache = new Map();
+private current?: HTMLAudioElement;
+private enabled = true;
+private masterVolume = 0.9;
 
- private playNow(line:VoiceLine,generation:number):Promise<boolean>{
-  if(!this.enabled||generation!==this.generation)return Promise.resolve(false);
-  const path=this.getPath(line);let audio=this.cache.get(path);
-  if(!audio){audio=new Audio(path);audio.preload='auto';this.cache.set(path,audio)}
-  audio.volume=Math.max(0,Math.min(1,this.masterVolume*(line.volume??1)));
-  this.current=audio;
-  return new Promise(resolve=>{
-   const cleanup=()=>{audio?.removeEventListener('ended',ended);audio?.removeEventListener('error',failed)};
-   const ended=()=>{cleanup();if(this.current===audio)this.current=undefined;resolve(true)};
-   const failed=()=>{cleanup();if(this.current===audio)this.current=undefined;console.warn(`[VoiceManager] Missing/unplayable voice asset: ${path}`);resolve(false)};
-   audio.addEventListener('ended',ended,{once:true});audio.addEventListener('error',failed,{once:true});
-   void audio.play().then(()=>{this.unlocked=true}).catch(()=>{cleanup();if(this.current===audio)this.current=undefined;resolve(false)})
-  })
- }
+/**
 
- private async drain(){
-  if(this.current||!this.enabled||!this.unlocked)return;
-  while(this.queue.length&&this.enabled&&this.unlocked){
-   const item=this.queue.shift()!;
-   const played=await this.playNow(item.line,this.generation);
-   item.resolve(played);
+* Voice files will eventually live under:
+*
+* public/audio/voice/
+*
+* Example:
+* public/audio/voice/en/pythosura/arrival_01.mp3
+* public/audio/voice/hinglish/pythosura/arrival_01.mp3
+  */
+  private getPath(line: VoiceLine): string {
+  return `/audio/voice/${line.language}/${line.actor}/${line.id}.mp3`;
   }
- }
 
- async play(line:VoiceLine):Promise<boolean>{
-  if(!this.enabled||typeof window==='undefined')return false;
-  const priority=line.priority??'normal';
-  if(priority==='critical'){
-   this.stop();
-   this.queue=[];
-   if(!this.unlocked){this.queue.push({line,resolve:()=>{}});this.installAutoplayUnlock();return false}
-   return this.playNow(line,this.generation);
-  }
-  return new Promise(resolve=>{this.queue.push({line,resolve});this.installAutoplayUnlock();void this.drain()})
- }
+setEnabled(enabled: boolean) {
+this.enabled = enabled;
 
- preload(line:VoiceLine){
-  if(typeof window==='undefined')return;
-  const path=this.getPath(line);if(this.cache.has(path))return;
-  const audio=new Audio(path);audio.preload='auto';this.cache.set(path,audio)
- }
+```
+if (!enabled) {
+  this.stop();
+}
+```
 
- preloadMany(lines:VoiceLine[]){lines.forEach(line=>this.preload(line))}
- clearCache(){this.stop();this.cache.clear();this.queue=[]}
- async speak(line:VoiceLine){return this.play(line)}
 }
 
-export const voiceManager=new VoiceManager();
+setVolume(volume: number) {
+this.masterVolume = Math.max(0, Math.min(1, volume));
 
-export function voiceLine(id:string,text:string,actor:VoiceActor,language:VoiceLanguage,options:{priority?:VoicePriority;volume?:number}={}):VoiceLine{return{id,text,actor,language,priority:options.priority??'normal',volume:options.volume??1}}
-export function stopVoice(){voiceManager.stop()}
+```
+if (this.current) {
+  this.current.volume = this.masterVolume;
+}
+```
+
+}
+
+isEnabled() {
+return this.enabled;
+}
+
+stop() {
+if (!this.current) return;
+
+```
+this.current.pause();
+this.current.currentTime = 0;
+this.current = undefined;
+```
+
+}
+
+async play(line: VoiceLine): Promise<boolean> {
+if (!this.enabled || typeof window === 'undefined') {
+return false;
+}
+
+```
+this.stop();
+
+const path = this.getPath(line);
+
+let audio = this.cache.get(path);
+
+if (!audio) {
+  audio = new Audio(path);
+  audio.preload = 'auto';
+
+  audio.addEventListener(
+    'ended',
+    () => {
+      if (this.current === audio) {
+        this.current = undefined;
+      }
+    },
+    { once: false },
+  );
+
+  this.cache.set(path, audio);
+}
+
+audio.volume = Math.max(
+  0,
+  Math.min(1, this.masterVolume * (line.volume ?? 1)),
+);
+
+this.current = audio;
+
+try {
+  await audio.play();
+  return true;
+} catch (error) {
+  console.warn(`[VoiceManager] Could not play voice "${line.id}"`, error);
+
+  if (this.current === audio) {
+    this.current = undefined;
+  }
+
+  return false;
+}
+```
+
+}
+
+preload(line: VoiceLine) {
+if (typeof window === 'undefined') return;
+
+```
+const path = this.getPath(line);
+
+if (this.cache.has(path)) return;
+
+const audio = new Audio(path);
+audio.preload = 'auto';
+
+this.cache.set(path, audio);
+```
+
+}
+
+clearCache() {
+this.stop();
+this.cache.clear();
+}
+
+/**
+
+* Temporary compatibility helper.
+*
+* This intentionally does NOT use browser speech synthesis.
+* It gives us one central place to migrate existing dialogue
+* while the real voice assets are being created.
+  */
+  async speak(line: VoiceLine): Promise<boolean> {
+  return this.play(line);
+  }
+  }
+
+export const voiceManager = new VoiceManager();
+
+/**
+
+* Small helper for scripted dialogue.
+  */
+  export function voiceLine(
+  id: string,
+  text: string,
+  actor: VoiceActor,
+  language: VoiceLanguage,
+  options: {
+  priority?: VoicePriority;
+  volume?: number;
+  } = {},
+  ): VoiceLine {
+  return {
+  id,
+  text,
+  actor,
+  language,
+  priority: options.priority ?? 'normal',
+  volume: options.volume ?? 1,
+  };
+  }
+
+/**
+
+* Keeps the voice system independent from the existing SFX system.
+* Voice is dialogue; hellAudio remains ambience/impact/roar/etc.
+  */
+  export function stopVoice() {
+  voiceManager.stop();
+  }
