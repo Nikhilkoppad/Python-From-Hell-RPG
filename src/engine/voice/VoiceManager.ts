@@ -12,12 +12,27 @@ class VoiceManager{
  private enabled=true;
  private masterVolume=.9;
  private generation=0;
+ private unlocked=false;
+ private unlockHandler?:()=>void;
 
  private getPath(line:VoiceLine){return `/audio/voice/${line.language}/${line.actor}/${line.id}.mp3`}
 
  setEnabled(enabled:boolean){this.enabled=enabled;if(!enabled){this.stop();this.queue=[]}}
- setVolume(volume:number){this.masterVolume=Math.max(0,Math.min(1,volume));if(this.current)this.current.volume=this.masterVolume}
+ setVolume(volume:number){this.masterVolume=Math.max(0,Math.min(1,volume));if(this.current)this.current.volume=Math.max(0,Math.min(1,this.masterVolume))}
  isEnabled(){return this.enabled}
+
+ unlock(){
+  if(this.unlocked||typeof window==='undefined')return;
+  this.unlocked=true;
+  if(this.unlockHandler){window.removeEventListener('pointerdown',this.unlockHandler);window.removeEventListener('keydown',this.unlockHandler);this.unlockHandler=undefined}
+  void this.drain();
+ }
+ installAutoplayUnlock(){
+  if(typeof window==='undefined'||this.unlocked||this.unlockHandler)return;
+  this.unlockHandler=()=>this.unlock();
+  window.addEventListener('pointerdown',this.unlockHandler,{once:true,passive:true});
+  window.addEventListener('keydown',this.unlockHandler,{once:true,passive:true});
+ }
 
  stop(){this.generation++;if(this.current){this.current.pause();this.current.currentTime=0;this.current=undefined}}
 
@@ -32,13 +47,13 @@ class VoiceManager{
    const ended=()=>{cleanup();if(this.current===audio)this.current=undefined;resolve(true)};
    const failed=()=>{cleanup();if(this.current===audio)this.current=undefined;console.warn(`[VoiceManager] Missing/unplayable voice asset: ${path}`);resolve(false)};
    audio.addEventListener('ended',ended,{once:true});audio.addEventListener('error',failed,{once:true});
-   void audio.play().catch(()=>{cleanup();if(this.current===audio)this.current=undefined;resolve(false)})
+   void audio.play().then(()=>{this.unlocked=true}).catch(()=>{cleanup();if(this.current===audio)this.current=undefined;resolve(false)})
   })
  }
 
  private async drain(){
-  if(this.current||!this.enabled)return;
-  while(this.queue.length&&this.enabled){
+  if(this.current||!this.enabled||!this.unlocked)return;
+  while(this.queue.length&&this.enabled&&this.unlocked){
    const item=this.queue.shift()!;
    const played=await this.playNow(item.line,this.generation);
    item.resolve(played);
@@ -51,9 +66,10 @@ class VoiceManager{
   if(priority==='critical'){
    this.stop();
    this.queue=[];
+   if(!this.unlocked){this.queue.push({line,resolve:()=>{}});this.installAutoplayUnlock();return false}
    return this.playNow(line,this.generation);
   }
-  return new Promise(resolve=>{this.queue.push({line,resolve});void this.drain()})
+  return new Promise(resolve=>{this.queue.push({line,resolve});this.installAutoplayUnlock();void this.drain()})
  }
 
  preload(line:VoiceLine){
