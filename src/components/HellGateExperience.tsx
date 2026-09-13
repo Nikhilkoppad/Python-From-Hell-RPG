@@ -1,0 +1,68 @@
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {AnimatePresence,motion,useReducedMotion} from 'motion/react';
+import {ChevronRight,Flame,Languages,Volume2,VolumeX,Skull,Zap} from 'lucide-react';
+import '../hellgate.css';
+
+export type ExperienceLanguage='en'|'hinglish';
+const LANGUAGE_KEY='python-from-hell:language:v1';
+const ENTERED_KEY='python-from-hell:entered';
+
+type Phase='wake'|'arrival'|'choice'|'portal'|'guide'|'forced'|'language'|'launch';
+
+type Props={onComplete:()=>void};
+
+const copy={
+ en:{
+  wakeKicker:'SOMETHING IS VERY WRONG',wakeTitle:'WHERE THE HELL AM I?',wakeBody:'You open your eyes. Nothing. Then the sound arrives: screaming, distant shouting, metal scraping stone, demons arguing somewhere in the dark.',wakeButton:'OPEN YOUR EYES',
+  arrivalKicker:'DEVELOPER HELL // GATE 01',arrivalTitle:'PYTHONSURA HAS ARRIVED',arrivalBody:'The ground fractures beneath you. A colossal Python demon tears through the floor, laughs, and looks directly at you.',arrivalLine:'“Another idiot. Came here to die? HA HA HA.”',chance:'I will give you one chance to escape Hell. Survive the Python Dungeon.',accept:'ACCEPT THE DESCENT',reject:'NOPE. TAKE ME HOME',
+  portalTitle:'THE MOUTH IS THE DOOR',portalBody:'Pythonsura opens an enormous jaw. Behind the teeth is a black portal pulsing with Python syntax.',portalLine:'“Enter the dungeon at your own risk.”',learner:'“Chutya bana raha hai kya? Muh mein jaunga toh tu kha jayega mujhe, BC!”',demon:'“Chup-chaap ghus, loudya. Shaan-patti mat kar.”',enter:'JUMP INTO THE MOUTH',
+  guideTitle:'A SMALLER PROBLEM',guideBody:'Inside the dungeon, a miniature Pythonsura crawls out of your code editor and lands on your shoulder.',guideLine:'“Aa chutiye, main tera guide banta hoon.”',guideAccept:'FINE. GUIDE ME',guideReject:'I WORK ALONE',forced:'“Bhosdiwale, bakchodi kar raha hai? Mere alawa koi option nahi hai tere paas. Chup-chaap chal.”',
+  languageKicker:'CHOOSE YOUR TEACHER',languageTitle:'HOW SHOULD PYTHONSURA TALK TO YOU?',languageBody:'Teaching stays technically accurate. The personality, jokes, roasts and story dialogue follow your choice.',english:'ENGLISH',hinglish:'HINGLISH',englishDesc:'English tutor. Same brutality. Cleaner delivery.',hinglishDesc:'Indian-style Hinglish. Gaali mode unlocked.',launchKicker:'THE DUNGEON IS HUNGRY',launchTitle:'WELCOME TO PYTHON HELL',launchBody:'One rule: I teach until you understand. You code until you can prove it. The gate opens only when your brain earns the next room.',launch:'ENTER THE DUNGEON',
+ },
+ hi:{
+  wakeKicker:'KUCH BAKWAAS HO GAYI HAI',wakeTitle:'BC… YE JAGAH KYA HAI?',wakeBody:'Aankhein khulti hain. Andhera. Phir awaaz aati hai: cheekhne ki, chillane ki, lohe ke ghisne ki, aur door koi demon gaaliyan de raha hai.',wakeButton:'AANKHEIN KHOLO',
+  arrivalKicker:'DEVELOPER HELL // GATE 01',arrivalTitle:'PYTHONSURA AA GAYA',arrivalBody:'Zameen phat jaati hai. Ek giant Python demon dharti chhed ke bahar nikalta hai, hasta hai, aur seedha tumhe dekhta hai.',arrivalLine:'“Ek aur chutiya. Marne aaya hai? HA HA HA.”',chance:'Ek chance deta hoon. Python Dungeon survive kar. Tabhi Hell se bahar niklega.',accept:'DESCENT ACCEPT KAR',reject:'BC MUJHE GHAR BHEJ',
+  portalTitle:'MUH HI DARWAZA HAI',portalBody:'Pythonsura apna enormous muh kholta hai. Daanton ke beech ek kaala portal dhadak raha hai.',portalLine:'“Enter the dungeon at your own risk.”',learner:'“Chutya bana raha hai kya? Muh mein jaunga toh tu kha jayega mujhe, BC!”',demon:'“Chup-chaap ghus, loudya. Shaan-patti mat kar.”',enter:'MUH MEIN GHUS',
+  guideTitle:'AB EK CHHOTA CHUTYA',guideBody:'Dungeon ke andar tumhare code se ek mini-Pythosura bahar koodta hai aur kandhe par baith jaata hai.',guideLine:'“Aa chutiye, main tera guide banta hoon.”',guideAccept:'THEEK HAI, GUIDE KAR',guideReject:'MAIN AKELA KHELUNGA',forced:'“Bhosdiwale, bakchodi kar raha hai? Mere alawa koi option nahi hai tere paas. Chup-chaap chal.”',
+  languageKicker:'APNA TEACHER CHUN',languageTitle:'PYTHONSURA KAISE BAAT KARE?',languageBody:'Teaching technically accurate rahegi. Personality, jokes, roasts aur story dialogue tumhari language follow karega.',english:'ENGLISH',hinglish:'HINGLISH',englishDesc:'English tutor. Same brutality. Cleaner delivery.',hinglishDesc:'Indian-style Hinglish. Full gaali mode.',launchKicker:'DUNGEON BHUKHA HAI',launchTitle:'PYTHON HELL MEIN SWAGAT HAI',launchBody:'Ek rule: samajh aane tak main sikhaunga. Prove karne tak tum code karoge. Agla room dimaag earn karega.',launch:'DUNGEON MEIN GHUS',
+ }
+};
+
+function rememberAudio(enabled:boolean){if(!enabled)return;try{const Ctx=window.AudioContext||(window as typeof window & {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!Ctx)return;const ctx=new Ctx();const master=ctx.createGain();master.gain.value=.07;master.connect(ctx.destination);const rumble=ctx.createOscillator();rumble.type='sine';rumble.frequency.value=48;const gain=ctx.createGain();gain.gain.value=.0001;rumble.connect(gain);gain.connect(master);rumble.start();gain.gain.exponentialRampToValueAtTime(.18,ctx.currentTime+.25);gain.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+2.1);rumble.stop(ctx.currentTime+2.2);window.setTimeout(()=>void ctx.close(),2400)}catch{}}
+
+export function getExperienceLanguage():ExperienceLanguage{try{return localStorage.getItem(LANGUAGE_KEY)==='hinglish'?'hinglish':'en'}catch{return'en'}}
+export function setExperienceLanguage(language:ExperienceLanguage){try{localStorage.setItem(LANGUAGE_KEY,language)}catch{}}
+
+export function HellGateExperience({onComplete}:Props){
+ const reduced=useReducedMotion();
+ const [phase,setPhase]=useState<Phase>('wake');
+ const [language,setLanguage]=useState<ExperienceLanguage>(getExperienceLanguage());
+ const [sound,setSound]=useState(true);
+ const [shake,setShake]=useState(false);
+ const timer=useRef<number|undefined>(undefined);
+ const t=copy[language];
+ const progress=useMemo(()=>['wake','arrival','choice','portal','guide','forced','language','launch'].indexOf(phase),[phase]);
+ useEffect(()=>()=>{if(timer.current)window.clearTimeout(timer.current)},[]);
+ const next=(p:Phase)=>{setPhase(p);if(sound)rememberAudio(true);if(p==='arrival'||p==='portal'||p==='forced') {setShake(true);window.setTimeout(()=>setShake(false),420)}};
+ const accept=()=>next('portal');
+ const reject=()=>next('choice');
+ const setLang=(l:ExperienceLanguage)=>{setLanguage(l);setExperienceLanguage(l);next('launch')};
+ const complete=()=>{try{localStorage.setItem(ENTERED_KEY,'yes')}catch{};onComplete()};
+ return <main className={`hellgate-experience ${shake?'shake':''}`}>
+  <div className="hellgate-noise" aria-hidden="true"/><div className="hellgate-embers" aria-hidden="true">{Array.from({length:18},(_,i)=><i key={i} style={{'--i':i} as React.CSSProperties}/>)}</div>
+  <header className="hellgate-header"><div className="hellgate-brand"><Flame size={18}/><span>PYTHON <b>FROM HELL</b></span></div><div className="hellgate-tools"><button onClick={()=>setSound(v=>!v)} aria-label={sound?'Mute ambience':'Enable ambience'}>{sound?<Volume2 size={14}/>:<VolumeX size={14}/>}</button><span>{String(Math.max(0,progress+1)).padStart(2,'0')} / 08</span></div></header>
+  <div className="hellgate-stage">
+   <AnimatePresence mode="wait">
+    {phase==='wake'&&<motion.section key="wake" className="gate-scene wake-scene" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><div className="scene-whisper">{t.wakeKicker}</div><div className="dark-hole"/><h1>{t.wakeTitle}</h1><p>{t.wakeBody}</p><div className="sound-script"><span>♪</span> screaming // metal // demons // distant chaos</div><button className="gate-main" onClick={()=>next('arrival')}>{t.wakeButton}<ChevronRight size={18}/></button></motion.section>}
+    {phase==='arrival'&&<motion.section key="arrival" className="gate-scene arrival-scene" initial={{opacity:0,y:20,scale:.97}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:-15}}><div className="demon-portal"><motion.div className="demon-face" animate={reduced?undefined:{y:[0,-5,0],rotate:[0,-1,0,1,0]}} transition={{duration:2.4,repeat:Infinity}}><Skull size={58}/><Flame className="face-flame" size={30}/></motion.div></div><div className="scene-whisper">{t.arrivalKicker}</div><h1>{t.arrivalTitle}</h1><p>{t.arrivalBody}</p><blockquote>{t.arrivalLine}</blockquote><p className="chance">{t.chance}</p><div className="scene-actions"><button className="gate-main" onClick={accept}>{t.accept}<Zap size={17}/></button><button className="gate-ghost" onClick={()=>next('language')}>{t.reject}</button></div></motion.section>}
+    {phase==='choice'&&<motion.section key="choice" className="gate-scene choice-scene" initial={{opacity:0,x:-18}} animate={{opacity:1,x:0}} exit={{opacity:0}}><div className="scene-whisper">PYTHONSURA IS WAITING</div><h1>YOU DO NOT GET TO LEAVE YET.</h1><p>{t.chance}</p><button className="gate-main" onClick={accept}>{t.accept}<ChevronRight size={18}/></button></motion.section>}
+    {phase==='portal'&&<motion.section key="portal" className="gate-scene portal-scene" initial={{opacity:0,scale:.9}} animate={{opacity:1,scale:1}} exit={{opacity:0}}><div className="jaw-portal"><div className="tooth-ring">{Array.from({length:16},(_,i)=><i key={i} style={{transform:`rotate(${i*22.5}deg) translateY(-96px)`}}/>)}</div><div className="portal-core"/></div><h1>{t.portalTitle}</h1><p>{t.portalBody}</p><blockquote>{t.portalLine}</blockquote><p className="learner-line">{t.learner}</p><p className="demon-line">{t.demon}</p><button className="gate-main" onClick={()=>next('guide')}>{t.enter}<ChevronRight size={18}/></button></motion.section>}
+    {phase==='guide'&&<motion.section key="guide" className="gate-scene guide-scene" initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} exit={{opacity:0}}><div className="mini-demon"><Flame size={38}/><span className="mini-eyes">••</span></div><div className="scene-whisper">PYTHON DUNGEON // CHAMBER ZERO</div><h1>{t.guideTitle}</h1><p>{t.guideBody}</p><blockquote>{t.guideLine}</blockquote><div className="scene-actions"><button className="gate-main" onClick={()=>next('language')}>{t.guideAccept}<ChevronRight size={17}/></button><button className="gate-ghost" onClick={()=>next('forced')}>{t.guideReject}</button></div></motion.section>}
+    {phase==='forced'&&<motion.section key="forced" className="gate-scene forced-scene" initial={{opacity:0,rotate:-1}} animate={{opacity:1,rotate:0}} exit={{opacity:0}}><div className="mini-demon angry"><Flame size={38}/></div><div className="scene-whisper">GUIDE CONTRACT: NON-NEGOTIABLE</div><h1>FINE. YOU'RE GETTING A GUIDE.</h1><blockquote>{t.forced}</blockquote><button className="gate-main" onClick={()=>next('language')}>ACCEPT THE LITTLE BASTARD <ChevronRight size={18}/></button></motion.section>}
+    {phase==='language'&&<motion.section key="language" className="gate-scene language-scene" initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} exit={{opacity:0}}><div className="scene-whisper"><Languages size={14}/> {t.languageKicker}</div><h1>{t.languageTitle}</h1><p>{t.languageBody}</p><div className="language-grid"><button className={language==='en'?'language-card selected':'language-card'} onClick={()=>setLanguage('en')}><strong>{t.english}</strong><span>{t.englishDesc}</span></button><button className={language==='hinglish'?'language-card selected':'language-card'} onClick={()=>setLanguage('hinglish')}><strong>{t.hinglish}</strong><span>{t.hinglishDesc}</span></button></div><button className="gate-main" onClick={()=>next('launch')}>LOCK IT IN <ChevronRight size={18}/></button></motion.section>}
+    {phase==='launch'&&<motion.section key="launch" className="gate-scene launch-scene" initial={{opacity:0,scale:.95}} animate={{opacity:1,scale:1}} exit={{opacity:0}}><div className="launch-rift"><span/><span/><span/></div><div className="scene-whisper">{t.launchKicker}</div><h1>{t.launchTitle}</h1><p>{t.launchBody}</p><div className="launch-rules"><span>01 // STORY FIRST</span><span>02 // PYTHONSURA TEACHES</span><span>03 // YOU WRITE</span><span>04 // RUNTIME JUDGES</span><span>05 // MASTERY OPENS THE GATE</span></div><button className="gate-main massive" onClick={complete}>{t.launch}<ChevronRight size={22}/></button></motion.section>}
+   </AnimatePresence>
+  </div>
+  <footer className="hellgate-footer"><span>PYTHONSURA // INSTRUCTOR</span><span>LOCAL PYTHON RUNTIME // READY</span><span>THE DUNGEON REMEMBERS</span></footer>
+ </main>
+}
