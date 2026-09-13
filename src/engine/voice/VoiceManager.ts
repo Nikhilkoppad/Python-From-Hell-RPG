@@ -15,9 +15,12 @@ export type VoiceLine = {
 
 type AudioCache = Map<string, HTMLAudioElement>;
 
+type PendingFinish = (played: boolean) => void;
+
 class VoiceManager {
   private cache: AudioCache = new Map();
   private current?: HTMLAudioElement;
+  private pendingFinish?: PendingFinish;
   private enabled = true;
   private masterVolume = 0.9;
 
@@ -50,6 +53,10 @@ class VoiceManager {
   }
 
   stop() {
+    const finishPending = this.pendingFinish;
+    this.pendingFinish = undefined;
+    finishPending?.(false);
+
     if (!this.current) return;
 
     this.current.pause();
@@ -96,8 +103,9 @@ class VoiceManager {
   }
 
   /**
-   * Plays one line and resolves only after the clip ends. This is used by
-   * cinematic dialogue where the next character must wait for the previous one.
+   * Plays one line and resolves only after the clip ends. Stopping or disabling
+   * the voice system also resolves the pending call, so cinematic transitions
+   * cannot leave an async sequence hanging forever.
    */
   async playAndWait(line: VoiceLine): Promise<boolean> {
     if (!this.enabled || typeof window === 'undefined') {
@@ -122,6 +130,9 @@ class VoiceManager {
       const finish = (played: boolean) => {
         if (settled) return;
         settled = true;
+        if (this.pendingFinish === finish) {
+          this.pendingFinish = undefined;
+        }
         audio!.removeEventListener('ended', onEnded);
         audio!.removeEventListener('error', onError);
         if (this.current === audio) {
@@ -132,6 +143,7 @@ class VoiceManager {
       const onEnded = () => finish(true);
       const onError = () => finish(false);
 
+      this.pendingFinish = finish;
       audio!.addEventListener('ended', onEnded, { once: true });
       audio!.addEventListener('error', onError, { once: true });
 
