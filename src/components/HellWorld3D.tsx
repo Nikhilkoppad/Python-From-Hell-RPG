@@ -149,68 +149,76 @@ function createPythosura(scale = 1): DemonRig {
   };
 }
 
-function rock(scene: THREE.Scene, x: number, z: number, size: number) {
-  const mesh = new THREE.Mesh(
-    new THREE.DodecahedronGeometry(size, 0),
-    material(0x171219, 0.15, 0.96, 0x21060a, 0.1),
-  );
-  mesh.position.set(x, size * 0.35, z);
-  mesh.rotation.set(
-    Math.random() * 2,
-    Math.random() * 2,
-    Math.random() * 2,
-  );
-  scene.add(mesh);
-}
+function createEnvironment(scene: THREE.Scene) {
+  const rockGeometry = new THREE.DodecahedronGeometry(1, 0);
+  const rockMaterial = material(0x171219, 0.15, 0.96, 0x21060a, 0.1);
+  const rocks = new THREE.InstancedMesh(rockGeometry, rockMaterial, 38);
+  const rockTransform = new THREE.Object3D();
 
-function torch(scene: THREE.Scene, x: number, z: number) {
-  const group = new THREE.Group();
-
-  const stick = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.07, 0.1, 1.2, 8),
-    material(0x2c1c18, 0.05, 0.95),
-  );
-  stick.position.y = 0.6;
-  group.add(stick);
-
-  const flame = new THREE.Mesh(
-    new THREE.ConeGeometry(0.18, 0.56, 8),
-    material(0xff4b25, 0.05, 0.35, 0xff1f00, 7),
-  );
-  flame.position.y = 1.42;
-  group.add(flame);
-
-  group.position.set(x, 0, z);
-  scene.add(group);
-}
-
-function embers(scene: THREE.Scene) {
-  const count = 280;
-  const positions = new Float32Array(count * 3);
-
-  for (let i = 0; i < count; i += 1) {
-    positions[i * 3] = (Math.random() - 0.5) * 28;
-    positions[i * 3 + 1] = Math.random() * 8;
-    positions[i * 3 + 2] = -Math.random() * 34;
+  for (let i = 0; i < 38; i += 1) {
+    const size = 0.3 + Math.random() * 1.5;
+    rockTransform.position.set(
+      (Math.random() - 0.5) * 30,
+      size * 0.35,
+      -3 - Math.random() * 34,
+    );
+    rockTransform.rotation.set(
+      Math.random() * 2,
+      Math.random() * 2,
+      Math.random() * 2,
+    );
+    rockTransform.scale.setScalar(size);
+    rockTransform.updateMatrix();
+    rocks.setMatrixAt(i, rockTransform.matrix);
   }
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute(
-    'position',
-    new THREE.BufferAttribute(positions, 3),
+  rocks.instanceMatrix.needsUpdate = true;
+  scene.add(rocks);
+
+  const torchStickGeometry = new THREE.CylinderGeometry(0.07, 0.1, 1.2, 8);
+  const torchStickMaterial = material(0x2c1c18, 0.05, 0.95);
+  const torchSticks = new THREE.InstancedMesh(
+    torchStickGeometry,
+    torchStickMaterial,
+    9,
   );
 
-  const points = new THREE.Points(
-    geometry,
-    new THREE.PointsMaterial({
-      color: 0xff693b,
-      size: 0.045,
-      transparent: true,
-      opacity: 0.85,
-    }),
+  const torchFlameGeometry = new THREE.ConeGeometry(0.18, 0.56, 8);
+  const torchFlameMaterial = material(
+    0xff4b25,
+    0.05,
+    0.35,
+    0xff1f00,
+    7,
+  );
+  const torchFlames = new THREE.InstancedMesh(
+    torchFlameGeometry,
+    torchFlameMaterial,
+    9,
   );
 
-  scene.add(points);
+  const torchTransform = new THREE.Object3D();
+
+  for (let i = 0; i < 9; i += 1) {
+    const x = (i % 2 ? -1 : 1) * (3.5 + Math.random() * 2.8);
+    const z = -5 - i * 3.8;
+
+    torchTransform.position.set(x, 0.6, z);
+    torchTransform.rotation.set(0, 0, 0);
+    torchTransform.scale.setScalar(1);
+    torchTransform.updateMatrix();
+    torchSticks.setMatrixAt(i, torchTransform.matrix);
+
+    torchTransform.position.set(x, 1.42, z);
+    torchTransform.updateMatrix();
+    torchFlames.setMatrixAt(i, torchTransform.matrix);
+  }
+
+  torchSticks.instanceMatrix.needsUpdate = true;
+  torchFlames.instanceMatrix.needsUpdate = true;
+  scene.add(torchSticks, torchFlames);
+
+  embers(scene);
 }
 
 function disposeScene(scene: THREE.Scene) {
@@ -253,7 +261,9 @@ export function HellWorld3D({
 }: Props) {
   const host = useRef<HTMLDivElement | null>(null);
   const phaseRef = useRef(phase);
+  const onBeatRef = useRef(onBeat);
   phaseRef.current = phase;
+  onBeatRef.current = onBeat;
 
   useEffect(() => {
     const element = host.current;
@@ -307,24 +317,7 @@ export function HellWorld3D({
     lava.position.set(0, 0.01, -24);
     scene.add(lava);
 
-    for (let i = 0; i < 38; i += 1) {
-      rock(
-        scene,
-        (Math.random() - 0.5) * 30,
-        -3 - Math.random() * 34,
-        0.3 + Math.random() * 1.5,
-      );
-    }
-
-    for (let i = 0; i < 9; i += 1) {
-      torch(
-        scene,
-        (i % 2 ? -1 : 1) * (3.5 + Math.random() * 2.8),
-        -5 - i * 3.8,
-      );
-    }
-
-    embers(scene);
+    createEnvironment(scene);
 
     const pyth = createPythosura();
     pyth.root.visible = false;
@@ -362,7 +355,7 @@ export function HellWorld3D({
     const emitBeat = (value: string) => {
       if (value === lastBeat) return;
       lastBeat = value;
-      onBeat?.(value);
+      onBeatRef.current?.(value);
     };
 
     const loop = (now: number) => {
@@ -484,7 +477,7 @@ export function HellWorld3D({
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [reducedMotion, onBeat]);
+  }, [reducedMotion]);
 
   return <div ref={host} className="hell-world-3d" aria-hidden="true" />;
 }
