@@ -56,9 +56,9 @@ PYTHONSURA first tries the built-in local Ollama API at `http://127.0.0.1:11434/
 
 `src/domain` contains curriculum and experience data. `src/engine` contains progression, rewards, adaptive logic, challenges, streaks, unlocks and audio. `src/execution` isolates browser Python execution. `src/components` contains interactive workspaces, including the tutor-driven lesson workspace and interview battle arena. `src/ai` contains the provider-neutral mentor adapter. Root-level UI polish styles are imported by `src/main.tsx`.
 
-Motion for React is installed from the open-source `motion` package and imported through `motion/react`; current official docs use this package/import path for React. citeturn350188search0turn639560search0
+Motion for React is installed from the open-source `motion` package and imported through `motion/react`. The official installation guide is https://motion.dev/docs/react-installation and the current npm package is published at https://www.npmjs.com/package/motion.
 
-The public UI/UX Pro Max project is used as design research rather than a runtime dependency. Its current public skill advertises design-system generation, style matching, UX guidelines, multiple React-oriented stacks, and pre-delivery review. citeturn543095search4turn543095search0
+The public UI/UX Pro Max project is used as design research rather than a runtime dependency. Its public skill documents design-system generation, style matching, UX guidelines, React-oriented stacks, and pre-delivery review. Source: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.
 
 The core loop is:
 
