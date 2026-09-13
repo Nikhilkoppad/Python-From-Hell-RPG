@@ -9,6 +9,8 @@ A story-driven Python learning RPG, browser coding IDE, debugging dungeon, boss 
 - 70 data-driven lessons from Python basics to CPython internals
 - Tutor-first lesson flow: STORY → ASSESS → TEACH → TRY → ROAST/EXPLAIN → RETRY → MASTER
 - PYTHONSURA JARVIS-style tutor panel with progressive hints, memes/emojis, playful profanity, and four mentor modes
+- Cinematic stage transitions driven by Motion for React, with reduced-motion support
+- Concept Loom: each lesson turns its idea into a tiny visual chain such as NAME → OBJECT → USE or INPUT → BODY → OUTPUT
 - Every lesson begins with a short story/diagnostic and requires repeated successful behavior checks before mastery unlocks the next lesson
 - Live tutor chat is built into the lesson workspace and keeps conversation history while sending the learner's code, runtime output, mastery and mistake context to the mentor
 - Built-in local Ollama mentor path defaults to `http://127.0.0.1:11434/api` with `gemma4:latest`, while keeping a deterministic fallback when Ollama is unavailable
@@ -24,7 +26,12 @@ A story-driven Python learning RPG, browser coding IDE, debugging dungeon, boss 
 - 30-question interview battle arena with full rank ladder, explanation/follow-up retry flow, and targeted code tasks
 - The Core finale unlocks a dedicated runtime-access cinematic after the final boss is cleared
 - Six executable project tracks with contract tests, persistent started/completed state, and one-time completion rewards
+- Redundant cosmetic telemetry HUD removed from the active experience so the lesson remains focused on learning
 - Responsive desktop/tablet/mobile navigation, keyboard shortcuts, visible focus states, reduced-motion handling, and crash recovery
+
+## Design system
+
+`design-system/MASTER.md` is the visual and interaction source of truth. It applies public UI/UX Pro Max design-intelligence principles to this product while deliberately keeping Python From Hell's own identity. The lesson screen is intentionally narrative-first instead of dashboard-first.
 
 ## Development
 
@@ -35,7 +42,7 @@ npm run build
 npm run dev
 ```
 
-`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, runtime cancellation, adaptive learning wiring, tutor-first lesson gates, lesson drafts, accessibility feedback, save portability, mobile navigation, the single active application entrypoint, local AI wiring, and other anti-regression rules. GitHub Actions runs verification before the production build.
+`npm run verify` checks all 12 layers, lesson depth, debugging cases, interview questions, executable boss coverage, project contracts, runtime cancellation, adaptive learning wiring, tutor-first lesson gates, lesson drafts, accessibility feedback, save portability, mobile navigation, the single active application entrypoint, local AI wiring, Motion/tutor contracts, and other anti-regression rules. GitHub Actions runs verification before the production build.
 
 ## Runtime targets
 
@@ -48,6 +55,10 @@ PYTHONSURA first tries the built-in local Ollama API at `http://127.0.0.1:11434/
 ## Architecture
 
 `src/domain` contains curriculum and experience data. `src/engine` contains progression, rewards, adaptive logic, challenges, streaks, unlocks and audio. `src/execution` isolates browser Python execution. `src/components` contains interactive workspaces, including the tutor-driven lesson workspace and interview battle arena. `src/ai` contains the provider-neutral mentor adapter. Root-level UI polish styles are imported by `src/main.tsx`.
+
+Motion for React is installed from the open-source `motion` package and imported through `motion/react`; current official docs use this package/import path for React. citeturn350188search0turn639560search0
+
+The public UI/UX Pro Max project is used as design research rather than a runtime dependency. Its current public skill advertises design-system generation, style matching, UX guidelines, multiple React-oriented stacks, and pre-delivery review. citeturn543095search4turn543095search0
 
 The core loop is:
 
